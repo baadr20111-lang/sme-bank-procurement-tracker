@@ -38,11 +38,16 @@
   .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .brand h1{font-size:22px;margin:0;font-weight:700;}
   .brand p{margin:2px 0 0;color:#B9C2D6;font-size:13px;}
-  .team-select{display:flex;gap:8px;align-items:center;font-size:13px;color:#CDD5E6;}
+  .team-select{display:flex;gap:8px;align-items:center;font-size:13px;color:#CDD5E6;flex-wrap:wrap;}
   .team-select select{
     background:#22315A;color:#fff;border:1px solid #3A4A78;border-radius:8px;
     padding:6px 10px;font-size:13px;font-family:inherit;
   }
+  .team-select button{
+    background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;
+    font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;
+  }
+  .team-select button:hover{background:#2a3f7a;}
 
   .overall{
     display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;padding:16px 18px;
@@ -134,37 +139,31 @@
 
   footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);font-size:11.5px;text-align:center;}
 
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;}
+  .modal.active{display:flex;}
+  .modal-box{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .modal-title{font-size:18px;font-weight:700;margin-bottom:12px;}
+  .modal-text{font-size:13px;color:var(--text-dim);margin-bottom:18px;line-height:1.6;}
+  .modal-buttons{display:flex;gap:8px;}
+  .modal-btn{flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .15s;}
+  .modal-btn-primary{background:var(--navy);color:#fff;}
+  .modal-btn-primary:hover{background:var(--navy-light);}
+  .modal-btn-secondary{background:#f0f0f0;color:var(--text);}
+  .modal-btn-secondary:hover{background:#e0e0e0;}
+
+  input[type="file"]{display:none;}
+
   @media (max-width:640px){
     .phase-progress-wrap{width:70px;}
     .price{display:none;}
     .brand{flex-direction:column;align-items:flex-start;}
+    .team-select{width:100%;}
   }
 </style>
 </head>
 <body>
 
-<div id="setup" style="display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:24px;text-align:center;">
-  <div style="max-width:480px;">
-    <h1 style="font-size:22px;margin-bottom:6px;">متابعة مشتريات المشروع</h1>
-    <p style="color:var(--text-dim);font-size:14px;line-height:1.7;">
-      هذا الرابط مو مُفعّل بعد. اضغط الزر تحت مرة وحدة بس (أول شخص يفتح الأداة) عشان تنشئ قاعدة البيانات المشتركة،
-      وبعدها انسخ الرابط الجديد وشاركه مع الفريق (بدر، ريان، سليمان) — نفس الرابط يفتح نفس البيانات للجميع.
-    </p>
-    <button id="setupCreateBtn" style="margin-top:14px;background:var(--navy);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;">
-      إنشاء قاعدة بيانات مشتركة
-    </button>
-    <div id="setupResult" style="display:none;margin-top:18px;text-align:right;">
-      <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">هذا رابطكم المشترك — شاركه كما هو:</div>
-      <input id="setupLinkBox" readonly style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font-family:inherit;font-size:12.5px;direction:ltr;text-align:left;">
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button id="copyLinkBtn" style="flex:1;background:var(--orange);color:#fff;border:none;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;">نسخ الرابط</button>
-        <a id="setupOpenBtn" href="#" style="flex:1;background:var(--teal);color:#fff;border:none;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;text-decoration:none;text-align:center;">فتح الأداة الآن</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="app" style="display:none;">
+<div id="app">
 <header class="top">
   <div class="wrap">
     <div class="brand">
@@ -173,7 +172,8 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
-        <button id="refreshBtn" title="تحديث من الفريق" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
+        <button id="exportBtn" title="تصدير البيانات">📥 تصدير</button>
+        <button id="importBtn" title="استيراد البيانات">📤 استيراد</button>
         أنا:
         <select id="whoAmI">
           <option value="">اختر اسمك</option>
@@ -216,7 +216,19 @@
   <div id="phases"></div>
 </div>
 
-<footer>الحفظ تلقائي ومشترك بين الفريق — أي تعديل يظهر لجميع من يفتح نفس الرابط (اضغط "تحديث" لأحدث نسخة).</footer>
+<footer>البيانات تحفظ تلقائياً على جهازك — استخدم "تصدير" و"استيراد" للمشاركة مع الفريق.</footer>
+</div>
+
+<div id="importModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-title">استيراد البيانات</div>
+    <div class="modal-text">اختر ملف البيانات الذي تم تصديره مسبقاً لاستعادة كل البيانات.</div>
+    <input id="fileInput" type="file" accept=".json">
+    <div class="modal-buttons">
+      <button class="modal-btn modal-btn-primary" onclick="document.getElementById('fileInput').click()">اختر الملف</button>
+      <button class="modal-btn modal-btn-secondary" onclick="closeImportModal()">إلغاء</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -293,119 +305,30 @@ const PHASES = [
   },
 ];
 
-// assign stable ids
 PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
 
-const STORAGE_KEY = "sme-bank-procurement-tracker-v1";
-let state = { items: {} }; // { itemId: { done:bool, assignee:string } }
+const STORAGE_KEY = "sme-bank-procurement-data";
+let state = { items: {} };
 let currentFilter = "الكل";
 let saveTimer = null;
-let BIN_USER = null;
-let BIN_ITEM = null;
-let lastRemoteFetch = 0;
 
 function fmt(n){
   return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n);
 }
 
-function getUrlParams(){
-  const p = new URLSearchParams(window.location.search);
-  return { u: p.get("u"), i: p.get("i") };
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, 300);
 }
 
-function shareUrl(u, i){
-  const base = window.location.origin + window.location.pathname;
-  return `${base}?u=${encodeURIComponent(u)}&i=${encodeURIComponent(i)}`;
-}
-
-async function apiCreateBin(initialData){
-  const res = await fetch("https://api.jsonstorage.net/v1/json", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(initialData),
-  });
-  if(!res.ok) throw new Error("create failed: " + res.status);
-  const json = await res.json();
-  // uri looks like https://api.jsonstorage.net/v1/json/{userId}/{itemId}
-  const parts = json.uri.split("/");
-  const itemId = parts.pop();
-  const userId = parts.pop();
-  return { userId, itemId };
-}
-
-async function apiGet(){
-  const res = await fetch(`https://api.jsonstorage.net/v1/json/${BIN_USER}/${BIN_ITEM}`, { cache: "no-store" });
-  if(!res.ok) throw new Error("get failed: " + res.status);
-  return await res.json();
-}
-
-async function apiPut(data){
-  const res = await fetch(`https://api.jsonstorage.net/v1/json/${BIN_USER}/${BIN_ITEM}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if(!res.ok) throw new Error("put failed: " + res.status);
-}
-
-function showSetupScreen(){
-  document.getElementById("app").style.display = "none";
-  const setup = document.getElementById("setup");
-  setup.style.display = "flex";
-  document.getElementById("setupCreateBtn").addEventListener("click", async ()=>{
-    const btn = document.getElementById("setupCreateBtn");
-    btn.disabled = true;
-    btn.textContent = "جاري الإنشاء...";
-    try{
-      const { userId, itemId } = await apiCreateBin({ items: {} });
-      const url = shareUrl(userId, itemId);
-      document.getElementById("setupResult").style.display = "block";
-      document.getElementById("setupLinkBox").value = url;
-      document.getElementById("setupOpenBtn").href = url;
-      btn.style.display = "none";
-    }catch(e){
-      btn.disabled = false;
-      btn.textContent = "إنشاء قاعدة بيانات مشتركة";
-      alert("صار خطأ أثناء الإنشاء، جرب مرة ثانية: " + e.message);
-    }
-  });
-  document.getElementById("copyLinkBtn").addEventListener("click", ()=>{
-    const box = document.getElementById("setupLinkBox");
-    box.select();
-    navigator.clipboard.writeText(box.value).then(()=>{
-      document.getElementById("copyLinkBtn").textContent = "تم النسخ ✓";
-      setTimeout(()=>{ document.getElementById("copyLinkBtn").textContent = "نسخ الرابط"; }, 1800);
-    });
-  });
-}
-
-async function loadState(showLoadingState){
-  try{
-    const remote = await apiGet();
-    if(remote && remote.items) state = remote;
-    lastRemoteFetch = Date.now();
-  }catch(e){
-    console.log("remote load failed, using cached local state", e);
-  }
+function loadState(){
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if(saved) state = JSON.parse(saved);
   const who = localStorage.getItem("sme-tracker-who");
   if(who) document.getElementById("whoAmI").value = who;
   render();
-}
-
-function queueSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{
-      await apiPut(state);
-    }catch(e){ console.error("save failed", e); }
-  }, 500);
-}
-
-function maybeRefresh(){
-  // throttle refetching to at most once every 20s to stay within the free API quota
-  if(Date.now() - lastRemoteFetch > 20000){
-    loadState();
-  }
 }
 
 function getItemState(id){
@@ -414,7 +337,7 @@ function getItemState(id){
 
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  queueSave();
+  saveState();
 }
 
 function allItems(){
@@ -572,20 +495,52 @@ document.getElementById("whoAmI").addEventListener("change", (e)=>{
   localStorage.setItem("sme-tracker-who", e.target.value);
 });
 
-// ---- bootstrap ----
-const params = getUrlParams();
-if(params.u && params.i){
-  BIN_USER = params.u;
-  BIN_ITEM = params.i;
-  document.getElementById("app").style.display = "block";
-  document.getElementById("setup").style.display = "none";
-  loadState();
-  document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
-  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) maybeRefresh(); });
-  window.addEventListener("focus", maybeRefresh);
-}else{
-  showSetupScreen();
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `procurement-data-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("importBtn").addEventListener("click", ()=>{
+  document.getElementById("importModal").classList.add("active");
+});
+
+function closeImportModal(){
+  document.getElementById("importModal").classList.remove("active");
 }
+
+document.getElementById("fileInput").addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (event)=>{
+    try{
+      const imported = JSON.parse(event.target.result);
+      if(imported.items){
+        state = imported;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+        closeImportModal();
+        alert("تم استيراد البيانات بنجاح! ✅");
+      }else{
+        alert("صيغة الملف غير صحيحة!");
+      }
+    }catch(err){
+      alert("خطأ في قراءة الملف: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+loadState();
 </script>
 </body>
 </html>
