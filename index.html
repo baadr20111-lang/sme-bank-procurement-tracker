@@ -2,8 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>متابعة مشتريات المشروع</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.0/dist/peerjs.min.js"></script>
 <style>
   :root{
     --navy:#16233F;
@@ -43,11 +45,6 @@
     background:#22315A;color:#fff;border:1px solid #3A4A78;border-radius:8px;
     padding:6px 10px;font-size:13px;font-family:inherit;
   }
-  .team-select button{
-    background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;
-    font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;
-  }
-  .team-select button:hover{background:#2a3f7a;}
   .sync-indicator{
     display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#4CAF50;
   }
@@ -57,6 +54,29 @@
     width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1s infinite;
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+
+  .qr-modal{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;
+    align-items:center;justify-content:center;
+  }
+  .qr-modal.show{display:flex;}
+  .qr-content{
+    background:#fff;border-radius:16px;padding:24px;text-align:center;max-width:400px;
+  }
+  .qr-content h2{margin:0 0 16px;font-size:18px;}
+  #qr-code{
+    margin:16px auto;
+    background:#fff;padding:12px;border-radius:8px;
+  }
+  .qr-id{
+    background:#f0f0f0;padding:12px;border-radius:8px;margin:12px 0;word-break:break-all;
+    font-family:monospace;font-size:12px;
+  }
+  .qr-close{
+    background:var(--navy);color:#fff;border:none;padding:10px 20px;
+    border-radius:8px;cursor:pointer;font-size:14px;margin-top:12px;
+  }
+  .qr-close:hover{background:var(--navy-light);}
 
   .overall{
     display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;padding:16px 18px;
@@ -73,6 +93,17 @@
   }
   .stat-pill .n{font-size:17px;font-weight:700;color:#fff;}
   .stat-pill .l{font-size:11px;color:#AEB8CE;margin-top:2px;}
+
+  .controls{
+    display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;
+  }
+  .btn{
+    border:1px solid var(--line);background:var(--card);color:var(--text);
+    padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;
+    transition:all .15s;
+  }
+  .btn:hover{border-color:var(--orange);color:var(--orange);}
+  .btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
 
   .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .filter-btn{
@@ -167,9 +198,9 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
-        <div class="sync-indicator syncing" id="syncStatus">
+        <div class="sync-indicator" id="syncStatus">
           <div class="sync-dot"></div>
-          <span>جاري الاتصال...</span>
+          <span id="syncText">جاهز</span>
         </div>
         أنا:
         <select id="whoAmI">
@@ -201,6 +232,11 @@
 </header>
 
 <div class="wrap">
+  <div class="controls">
+    <button class="btn primary" id="shareBtn">📱 شارك مع الفريق (QR Code)</button>
+    <button class="btn" id="syncBtn">🔄 مزامنة يدوية</button>
+  </div>
+
   <div class="filters" id="filters">
     <button class="filter-btn active" data-f="الكل">الكل</button>
     <button class="filter-btn" data-f="بدر">بدر</button>
@@ -213,14 +249,20 @@
   <div id="phases"></div>
 </div>
 
-<footer>المزامنة فورية مع Supabase Realtime ⚡ — أي تعديل يظهر للجميع لحظياً!</footer>
+<div id="qrModal" class="qr-modal">
+  <div class="qr-content">
+    <h2>شارك مع الفريق</h2>
+    <p style="margin:0;font-size:12px;color:#666;">اسكن الـ QR Code بالجوال الثاني</p>
+    <div id="qr-code"></div>
+    <div class="qr-id" id="qr-id"></div>
+    <button class="qr-close" onclick="document.getElementById('qrModal').classList.remove('show')">اغلق</button>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
+<footer>متصل مع الفريق مباشرة - بدون إنترنت! ⚡</footer>
+</div>
 
+<script>
 const PHASES = [
   {
     id: "p1",
@@ -254,27 +296,6 @@ const PHASES = [
       {n:"لوحتين فنية صغيرة", d:"لوحتين فنية صغيرة — مكتب أ. إبراهيم الراشد", u:"وحدة", q:2, price:2500, total:5000},
       {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:4000, total:8000},
       {n:"اتعاب نهى", d:"اتعاب الفنانة نهى الجريد", u:"وحدة", q:1, price:10000, total:10000},
-      {n:"نباتات طبيعية", d:"6 نباتات طبيعية (بدون أحواض) — الأحواض تُسعّر بشكل منفصل", u:"وحدة", q:6, price:158.33, total:950},
-      {n:"أحواض نباتات", d:"أحواض نباتات لمكتب الرئيس والمختصر (653 + 400 قيمة الأحواض)", u:"وحدة", q:6, price:175.5, total:1053},
-      {n:"طاولة كونسول وديكورات كلاسيكية", d:"طاولة كونسول لاستقبال مكتب الرئيس مع قطع تحف/ديكور كلاسيكية مرافقة (مرايا خشب انتيك، كوستار، تمريات زجاج، أبواب خشب مزخرفة، علبة فخار، مدخل خشب بنقش وردة، طقم صحن المنيوم، رسوم توصيل)", u:"وحدة", q:1, price:2476.09, total:2476.09},
-      {n:"فرشة صغيرة", d:"فرشة صغيرة لمكتب الرئيس / المختصر", u:"وحدة", q:1, price:565.23, total:565.23},
-      {n:"فرشة كبيرة", d:"فرشة كبيرة لمكتب الرئيس", u:"وحدة", q:1, price:1043.47, total:1043.47},
-      {n:"تجهيزات دورة مياه الرئيس ونائب الرئيس", d:"طقم: معطرات + فوط + حاويات (نسختان: للرئيس ولنائب الرئيس) والخداديات", u:"طقم", q:2, price:1374.79, total:2749.58},
-      {n:"معلاق بشت", d:"معلاق بشت لمكتب الرئيس", u:"وحدة", q:1, price:17.39, total:17.39},
-      {n:"معطرات", d:"معطرات إضافية", u:"وحدة", q:1, price:3417.39, total:3417.39},
-      {n:"سلال مهملات جلدية رسمية", d:"استبدال جميع سلال المهملات في مكتب الرئيس وغرفة الاجتماعات بسلال رسمية من الجلد", u:"وحدة", q:5, price:140, total:700},
-      {n:"سماعات صوتية", d:"سماعات صوتية للمختصر", u:"وحدة", q:1, price:520.87, total:520.87},
-      {n:"تجهيزات ركن رياضي", d:"أوزان مودرن ستايل + إضاءة + مناشف رياضية بسيطة للمختصر", u:"طقم", q:1, price:475, total:475},
-      {n:"رسوم عمالة", d:"نجارة + نقل وتعديل الدولاب + نقل جهاز المشين وإزالة الكتب والشاشة", u:"عمل", q:2, price:600, total:1200},
-      {n:"نباتات صغيرة بأصص", d:"6 نباتات صغيرة بأصص (بوتس)", u:"وحدة", q:6, price:18, total:108},
-      {n:"صندوق سجاد صغيرة", d:"صندوق/قطعة سجاد صغيرة", u:"وحدة", q:1, price:1000, total:1000},
-      {n:"فواحة بوباب", d:"فواحة عطرية (بوباب)", u:"وحدة", q:2, price:850, total:1700},
-      {n:"ليد إضاءة", d:"إضاءة LED", u:"طقم", q:1, price:309, total:309},
-      {n:"طوفريتين", d:"طوفريتين (قطعتان)", u:"وحدة", q:2, price:150, total:300},
-      {n:"مات ووطاية لدورة المياه", d:"مات ووطاية لدورة المياه", u:"طقم", q:2, price:500, total:1000},
-      {n:"كرسي استرخاء", d:"كرسي استرخاء", u:"كرسي", q:1, price:10000, total:10000},
-      {n:"أعلام السعودية", d:"أعلام المملكة العربية السعودية", u:"علم", q:4, price:650, total:2600},
-      {n:"أعلام بنك المنشآت", d:"أعلام بهوية بنك المنشآت", u:"علم", q:4, price:700, total:2800},
     ]
   },
   {
@@ -286,106 +307,128 @@ const PHASES = [
       {n:"لوحة البوابة", d:"عرض 4 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:2352},
       {n:"لوحة المواقف", d:"عرض 2.8 م وارتفاع 2.6 م", u:"وحدة", q:1, price:320, total:2329.6},
       {n:"لوحة الاستقبال", d:"عرض 2.5 م وارتفاع 1.5 م", u:"وحدة", q:1, price:320, total:1200},
-      {n:"إيجار لوحة واجهة المبنى", d:"إيجار سنوي — لوحة واجهة المبنى", u:"وحدة", q:1, price:10000, total:58800},
-      {n:"إيجار لوحة البوابة", d:"إيجار سنوي — لوحة البوابة", u:"وحدة", q:1, price:10000, total:56000},
-      {n:"إيجار لوحة المواقف", d:"إيجار سنوي — لوحة المواقف", u:"وحدة", q:1, price:7000, total:50960},
-      {n:"إيجار لوحة الاستقبال", d:"إيجار سنوي — لوحة الاستقبال", u:"وحدة", q:1, price:7000, total:26250},
     ]
   },
 ];
 
 PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
 
-let supabase = null;
+let peer = null;
+let myId = null;
+let connections = new Map();
 let state = { items: {} };
 let currentFilter = "الكل";
-
-const supabase_client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function fmt(n){
   return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n);
 }
 
-function setSyncStatus(status){
-  const el = document.getElementById("syncStatus");
-  el.className = "sync-indicator " + status;
-  const statusTexts = {
-    syncing: '<div class="sync-dot"></div><span>جاري المزامنة...</span>',
-    connected: '<div class="sync-dot"></div><span>متصل ✓</span>',
-    error: '<div class="sync-dot"></div><span>خطأ في الاتصال</span>'
-  };
-  el.innerHTML = statusTexts[status] || statusTexts.syncing;
+function setSyncStatus(msg){
+  document.getElementById("syncText").textContent = msg;
+  const indicator = document.getElementById("syncStatus");
+  if(msg.includes("✓")) indicator.style.color = "#4CAF50";
+  else if(msg.includes("⚠")) indicator.style.color = "#FFA500";
+  else indicator.style.color = "#4CAF50";
 }
 
-async function initSupabase(){
-  try{
-    setSyncStatus("syncing");
-    
-    // Initialize table
-    const { data: existing } = await supabase_client
-      .from('procurement')
-      .select('*')
-      .limit(1);
-    
-    if(!existing || existing.length === 0){
-      await supabase_client
-        .from('procurement')
-        .insert([{ items: {} }]);
+function initPeer(){
+  const peerScript = document.createElement("script");
+  
+  peer = new Peer({
+    config: {
+      iceServers: [
+        { urls: ["stun:stun.l.google.com:19302"] }
+      ]
     }
+  });
 
-    // Load initial state
-    await loadState();
-    
-    // Subscribe to real-time changes
-    supabase_client
-      .channel('public:procurement')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'procurement' },
-        (payload) => {
-          if(payload.new && payload.new.items){
-            state.items = payload.new.items;
-            render();
-          }
-        }
-      )
-      .subscribe(() => {
-        setSyncStatus("connected");
-      });
+  peer.on("open", (id) => {
+    myId = id;
+    setSyncStatus("متصل ✓");
+    console.log("My ID:", id);
+    showQRCode(id);
+  });
 
-    const who = localStorage.getItem("sme-tracker-who");
-    if(who) document.getElementById("whoAmI").value = who;
-    render();
-  }catch(e){
-    console.error("Init failed:", e);
-    setSyncStatus("error");
-    alert("خطأ: " + e.message);
-  }
+  peer.on("connection", (conn) => {
+    console.log("Connection from:", conn.peer);
+    setupConnection(conn);
+  });
+
+  peer.on("error", (err) => {
+    console.error("Peer error:", err);
+    setSyncStatus("خطأ اتصال ⚠");
+  });
 }
 
-async function loadState(){
-  try{
-    const { data } = await supabase_client
-      .from('procurement')
-      .select('items')
-      .limit(1);
-    
-    if(data && data[0] && data[0].items){
-      state.items = data[0].items;
+function setupConnection(conn){
+  connections.set(conn.peer, conn);
+  
+  conn.on("data", (data) => {
+    if(data.type === "sync"){
+      state.items = data.items;
+      render();
     }
-  }catch(e){
-    console.error("Load error:", e);
-  }
+  });
+
+  conn.on("close", () => {
+    connections.delete(conn.peer);
+  });
+
+  conn.on("error", (err) => {
+    console.error("Connection error:", err);
+  });
 }
 
-async function saveState(){
-  try{
-    await supabase_client
-      .from('procurement')
-      .update({ items: state.items })
-      .eq('id', (await supabase_client.from('procurement').select('id').limit(1)).data[0].id);
-  }catch(e){
-    console.error("Save error:", e);
-  }
+function connectToPeer(peerId){
+  if(!peer) return;
+  const conn = peer.connect(peerId);
+  setupConnection(conn);
+}
+
+function broadcast(){
+  connections.forEach(conn => {
+    try{
+      conn.send({ type: "sync", items: state.items });
+    }catch(e){
+      console.error("Broadcast error:", e);
+    }
+  });
+}
+
+function showQRCode(id){
+  const qrContainer = document.getElementById("qr-code");
+  qrContainer.innerHTML = "";
+  
+  const url = `${window.location.origin}${window.location.pathname}?peer=${id}`;
+  
+  QRCode.toCanvas(qrContainer, url, {
+    width: 250,
+    margin: 0,
+    color: { dark: "#16233F", light: "#fff" }
+  }, (err) => {
+    if(err) console.error("QR error:", err);
+  });
+
+  document.getElementById("qr-id").textContent = "ID: " + id;
+}
+
+document.getElementById("shareBtn").addEventListener("click", () => {
+  document.getElementById("qrModal").classList.add("show");
+});
+
+document.getElementById("syncBtn").addEventListener("click", () => {
+  broadcast();
+  setSyncStatus("مزامنة جاري... ✓");
+  setTimeout(() => setSyncStatus("متصل ✓"), 1500);
+});
+
+const params = new URLSearchParams(window.location.search);
+const peerParam = params.get("peer");
+
+initPeer();
+
+if(peerParam){
+  setTimeout(() => connectToPeer(peerParam), 1000);
 }
 
 function getItemState(id){
@@ -394,7 +437,7 @@ function getItemState(id){
 
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  saveState();
+  broadcast();
 }
 
 function allItems(){
@@ -552,7 +595,10 @@ document.getElementById("whoAmI").addEventListener("change", (e)=>{
   localStorage.setItem("sme-tracker-who", e.target.value);
 });
 
-initSupabase();
+const who = localStorage.getItem("sme-tracker-who");
+if(who) document.getElementById("whoAmI").value = who;
+
+render();
 </script>
 </body>
 </html>
