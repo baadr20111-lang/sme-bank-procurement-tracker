@@ -52,6 +52,7 @@
     display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#4CAF50;
   }
   .sync-indicator.syncing{color:#FFA500;}
+  .sync-indicator.error{color:#F44336;}
   .sync-dot{
     width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1s infinite;
   }
@@ -147,8 +148,6 @@
 
   footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);font-size:11.5px;text-align:center;}
 
-  .loading{text-align:center;padding:40px;color:var(--text-dim);}
-
   @media (max-width:640px){
     .phase-progress-wrap{width:70px;}
     .price{display:none;}
@@ -170,7 +169,7 @@
       <div class="team-select">
         <div class="sync-indicator syncing" id="syncStatus">
           <div class="sync-dot"></div>
-          <span>جاري التحديث...</span>
+          <span>جاري الاتصال...</span>
         </div>
         أنا:
         <select id="whoAmI">
@@ -214,10 +213,14 @@
   <div id="phases"></div>
 </div>
 
-<footer>المزامنة فورية — أي تعديل يظهر لجميع من يفتح نفس الرابط لحظياً! ⚡</footer>
+<footer>المزامنة فورية مع Supabase Realtime ⚡ — أي تعديل يظهر للجميع لحظياً!</footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
+
 const PHASES = [
   {
     id: "p1",
@@ -293,115 +296,96 @@ const PHASES = [
 
 PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
 
-const JSONBIN_MASTER_KEY = "18ee31c14d40be11a49e6e8c59e9c61e";
-let BIN_ID = null;
+let supabase = null;
 let state = { items: {} };
 let currentFilter = "الكل";
-let saveTimer = null;
-let syncTimer = null;
-let lastSyncTime = 0;
+
+const supabase_client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function fmt(n){
   return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n);
 }
 
-function setSyncStatus(syncing){
+function setSyncStatus(status){
   const el = document.getElementById("syncStatus");
-  if(syncing){
-    el.classList.add("syncing");
-    el.innerHTML = '<div class="sync-dot"></div><span>جاري التحديث...</span>';
-  }else{
-    el.classList.remove("syncing");
-    el.innerHTML = '<div class="sync-dot"></div><span>محدث ✓</span>';
-  }
+  el.className = "sync-indicator " + status;
+  const statusTexts = {
+    syncing: '<div class="sync-dot"></div><span>جاري المزامنة...</span>',
+    connected: '<div class="sync-dot"></div><span>متصل ✓</span>',
+    error: '<div class="sync-dot"></div><span>خطأ في الاتصال</span>'
+  };
+  el.innerHTML = statusTexts[status] || statusTexts.syncing;
 }
 
-async function initBin(){
+async function initSupabase(){
   try{
-    const params = new URLSearchParams(window.location.search);
-    const binId = params.get("bin");
+    setSyncStatus("syncing");
     
-    if(binId){
-      BIN_ID = binId;
-      await loadRemoteState();
-    }else{
-      // Create new bin
-      setSyncStatus(true);
-      const res = await fetch("https://api.jsonbin.io/v3/b", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Master-Key": JSONBIN_MASTER_KEY
-        },
-        body: JSON.stringify({ items: {} })
-      });
-      const json = await res.json();
-      BIN_ID = json.metadata.id;
-      const newUrl = `${window.location.pathname}?bin=${BIN_ID}`;
-      window.history.replaceState({}, "", newUrl);
-      setSyncStatus(false);
-      render();
+    // Initialize table
+    const { data: existing } = await supabase_client
+      .from('procurement')
+      .select('*')
+      .limit(1);
+    
+    if(!existing || existing.length === 0){
+      await supabase_client
+        .from('procurement')
+        .insert([{ items: {} }]);
     }
-  }catch(e){
-    console.error("Init failed:", e);
-    alert("خطأ في الاتصال: " + e.message);
-  }
-}
 
-async function loadRemoteState(){
-  try{
-    setSyncStatus(true);
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      headers: { "X-Master-Key": JSONBIN_MASTER_KEY }
-    });
-    if(res.ok){
-      const json = await res.json();
-      if(json.record && json.record.items){
-        state = json.record;
-      }
-    }
-    lastSyncTime = Date.now();
-    setSyncStatus(false);
+    // Load initial state
+    await loadState();
+    
+    // Subscribe to real-time changes
+    supabase_client
+      .channel('public:procurement')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'procurement' },
+        (payload) => {
+          if(payload.new && payload.new.items){
+            state.items = payload.new.items;
+            render();
+          }
+        }
+      )
+      .subscribe(() => {
+        setSyncStatus("connected");
+      });
+
     const who = localStorage.getItem("sme-tracker-who");
     if(who) document.getElementById("whoAmI").value = who;
     render();
   }catch(e){
-    console.error("Load failed:", e);
-    setSyncStatus(false);
+    console.error("Init failed:", e);
+    setSyncStatus("error");
+    alert("خطأ: " + e.message);
   }
 }
 
-async function saveRemoteState(){
-  if(!BIN_ID) return;
+async function loadState(){
   try{
-    setSyncStatus(true);
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_MASTER_KEY
-      },
-      body: JSON.stringify(state)
-    });
-    setSyncStatus(false);
+    const { data } = await supabase_client
+      .from('procurement')
+      .select('items')
+      .limit(1);
+    
+    if(data && data[0] && data[0].items){
+      state.items = data[0].items;
+    }
   }catch(e){
-    console.error("Save failed:", e);
-    setSyncStatus(false);
+    console.error("Load error:", e);
   }
 }
 
-function queueSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveRemoteState, 800);
-}
-
-function startAutoSync(){
-  clearInterval(syncTimer);
-  syncTimer = setInterval(()=>{
-    if(Date.now() - lastSyncTime > 3000){
-      loadRemoteState();
-    }
-  }, 2000);
+async function saveState(){
+  try{
+    await supabase_client
+      .from('procurement')
+      .update({ items: state.items })
+      .eq('id', (await supabase_client.from('procurement').select('id').limit(1)).data[0].id);
+  }catch(e){
+    console.error("Save error:", e);
+  }
 }
 
 function getItemState(id){
@@ -410,7 +394,7 @@ function getItemState(id){
 
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  queueSave();
+  saveState();
 }
 
 function allItems(){
@@ -568,16 +552,7 @@ document.getElementById("whoAmI").addEventListener("change", (e)=>{
   localStorage.setItem("sme-tracker-who", e.target.value);
 });
 
-document.addEventListener("visibilitychange", ()=>{
-  if(!document.hidden) loadRemoteState();
-});
-
-window.addEventListener("focus", ()=>{
-  loadRemoteState();
-});
-
-initBin();
-startAutoSync();
+initSupabase();
 </script>
 </body>
 </html>
