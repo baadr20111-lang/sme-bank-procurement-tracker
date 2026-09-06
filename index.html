@@ -48,6 +48,14 @@
     font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;
   }
   .team-select button:hover{background:#2a3f7a;}
+  .sync-indicator{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#4CAF50;
+  }
+  .sync-indicator.syncing{color:#FFA500;}
+  .sync-dot{
+    width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 
   .overall{
     display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;padding:16px 18px;
@@ -139,25 +147,13 @@
 
   footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);font-size:11.5px;text-align:center;}
 
-  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;}
-  .modal.active{display:flex;}
-  .modal-box{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-  .modal-title{font-size:18px;font-weight:700;margin-bottom:12px;}
-  .modal-text{font-size:13px;color:var(--text-dim);margin-bottom:18px;line-height:1.6;}
-  .modal-buttons{display:flex;gap:8px;}
-  .modal-btn{flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .15s;}
-  .modal-btn-primary{background:var(--navy);color:#fff;}
-  .modal-btn-primary:hover{background:var(--navy-light);}
-  .modal-btn-secondary{background:#f0f0f0;color:var(--text);}
-  .modal-btn-secondary:hover{background:#e0e0e0;}
-
-  input[type="file"]{display:none;}
+  .loading{text-align:center;padding:40px;color:var(--text-dim);}
 
   @media (max-width:640px){
     .phase-progress-wrap{width:70px;}
     .price{display:none;}
     .brand{flex-direction:column;align-items:flex-start;}
-    .team-select{width:100%;}
+    .team-select{width:100%;flex-wrap:wrap;}
   }
 </style>
 </head>
@@ -172,8 +168,10 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
-        <button id="exportBtn" title="تصدير البيانات">📥 تصدير</button>
-        <button id="importBtn" title="استيراد البيانات">📤 استيراد</button>
+        <div class="sync-indicator syncing" id="syncStatus">
+          <div class="sync-dot"></div>
+          <span>جاري التحديث...</span>
+        </div>
         أنا:
         <select id="whoAmI">
           <option value="">اختر اسمك</option>
@@ -216,19 +214,7 @@
   <div id="phases"></div>
 </div>
 
-<footer>البيانات تحفظ تلقائياً على جهازك — استخدم "تصدير" و"استيراد" للمشاركة مع الفريق.</footer>
-</div>
-
-<div id="importModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-title">استيراد البيانات</div>
-    <div class="modal-text">اختر ملف البيانات الذي تم تصديره مسبقاً لاستعادة كل البيانات.</div>
-    <input id="fileInput" type="file" accept=".json">
-    <div class="modal-buttons">
-      <button class="modal-btn modal-btn-primary" onclick="document.getElementById('fileInput').click()">اختر الملف</button>
-      <button class="modal-btn modal-btn-secondary" onclick="closeImportModal()">إلغاء</button>
-    </div>
-  </div>
+<footer>المزامنة فورية — أي تعديل يظهر لجميع من يفتح نفس الرابط لحظياً! ⚡</footer>
 </div>
 
 <script>
@@ -307,28 +293,115 @@ const PHASES = [
 
 PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
 
-const STORAGE_KEY = "sme-bank-procurement-data";
+const JSONBIN_MASTER_KEY = "18ee31c14d40be11a49e6e8c59e9c61e";
+let BIN_ID = null;
 let state = { items: {} };
 let currentFilter = "الكل";
 let saveTimer = null;
+let syncTimer = null;
+let lastSyncTime = 0;
 
 function fmt(n){
   return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n);
 }
 
-function saveState(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, 300);
+function setSyncStatus(syncing){
+  const el = document.getElementById("syncStatus");
+  if(syncing){
+    el.classList.add("syncing");
+    el.innerHTML = '<div class="sync-dot"></div><span>جاري التحديث...</span>';
+  }else{
+    el.classList.remove("syncing");
+    el.innerHTML = '<div class="sync-dot"></div><span>محدث ✓</span>';
+  }
 }
 
-function loadState(){
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if(saved) state = JSON.parse(saved);
-  const who = localStorage.getItem("sme-tracker-who");
-  if(who) document.getElementById("whoAmI").value = who;
-  render();
+async function initBin(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const binId = params.get("bin");
+    
+    if(binId){
+      BIN_ID = binId;
+      await loadRemoteState();
+    }else{
+      // Create new bin
+      setSyncStatus(true);
+      const res = await fetch("https://api.jsonbin.io/v3/b", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": JSONBIN_MASTER_KEY
+        },
+        body: JSON.stringify({ items: {} })
+      });
+      const json = await res.json();
+      BIN_ID = json.metadata.id;
+      const newUrl = `${window.location.pathname}?bin=${BIN_ID}`;
+      window.history.replaceState({}, "", newUrl);
+      setSyncStatus(false);
+      render();
+    }
+  }catch(e){
+    console.error("Init failed:", e);
+    alert("خطأ في الاتصال: " + e.message);
+  }
+}
+
+async function loadRemoteState(){
+  try{
+    setSyncStatus(true);
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      headers: { "X-Master-Key": JSONBIN_MASTER_KEY }
+    });
+    if(res.ok){
+      const json = await res.json();
+      if(json.record && json.record.items){
+        state = json.record;
+      }
+    }
+    lastSyncTime = Date.now();
+    setSyncStatus(false);
+    const who = localStorage.getItem("sme-tracker-who");
+    if(who) document.getElementById("whoAmI").value = who;
+    render();
+  }catch(e){
+    console.error("Load failed:", e);
+    setSyncStatus(false);
+  }
+}
+
+async function saveRemoteState(){
+  if(!BIN_ID) return;
+  try{
+    setSyncStatus(true);
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": JSONBIN_MASTER_KEY
+      },
+      body: JSON.stringify(state)
+    });
+    setSyncStatus(false);
+  }catch(e){
+    console.error("Save failed:", e);
+    setSyncStatus(false);
+  }
+}
+
+function queueSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveRemoteState, 800);
+}
+
+function startAutoSync(){
+  clearInterval(syncTimer);
+  syncTimer = setInterval(()=>{
+    if(Date.now() - lastSyncTime > 3000){
+      loadRemoteState();
+    }
+  }, 2000);
 }
 
 function getItemState(id){
@@ -337,7 +410,7 @@ function getItemState(id){
 
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  saveState();
+  queueSave();
 }
 
 function allItems(){
@@ -495,52 +568,16 @@ document.getElementById("whoAmI").addEventListener("change", (e)=>{
   localStorage.setItem("sme-tracker-who", e.target.value);
 });
 
-document.getElementById("exportBtn").addEventListener("click", ()=>{
-  const dataStr = JSON.stringify(state, null, 2);
-  const blob = new Blob([dataStr], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `procurement-data-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden) loadRemoteState();
 });
 
-document.getElementById("importBtn").addEventListener("click", ()=>{
-  document.getElementById("importModal").classList.add("active");
+window.addEventListener("focus", ()=>{
+  loadRemoteState();
 });
 
-function closeImportModal(){
-  document.getElementById("importModal").classList.remove("active");
-}
-
-document.getElementById("fileInput").addEventListener("change", (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (event)=>{
-    try{
-      const imported = JSON.parse(event.target.result);
-      if(imported.items){
-        state = imported;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        render();
-        closeImportModal();
-        alert("تم استيراد البيانات بنجاح! ✅");
-      }else{
-        alert("صيغة الملف غير صحيحة!");
-      }
-    }catch(err){
-      alert("خطأ في قراءة الملف: " + err.message);
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
-
-loadState();
+initBin();
+startAutoSync();
 </script>
 </body>
 </html>
