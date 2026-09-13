@@ -9,14 +9,14 @@
   :root{
     --navy:#16233F; --navy-light:#243B6B; --orange:#FF7704; --orange-soft:#FFE7D1;
     --teal:#2BB5A0; --bg:#FAF8F5; --card:#FFFFFF; --line:#E7E2D9;
-    --text:#20242E; --text-dim:#767A85;
+    --text:#20242E; --text-dim:#767A85; --red:#D64545; --green:#2BB5A0;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);
     font-family:"Segoe UI","Tahoma","Geeza Pro",system-ui,sans-serif;
-    line-height:1.5;padding:0 0 60px;}
-  .wrap{max-width:920px;margin:0 auto;padding:0 20px;}
+    line-height:1.5;padding:0 0 80px;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
   header.top{background:var(--navy);color:#fff;padding:28px 0 24px;margin-bottom:22px;}
   header.top .wrap{display:flex;flex-direction:column;gap:16px;}
   .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
@@ -36,15 +36,24 @@
   .overall-text{flex:1;min-width:180px;}
   .overall-text .big{font-size:19px;font-weight:700;}
   .overall-text .small{font-size:12.5px;color:#AEB8CE;margin-top:2px;}
-  .stat-pill{background:#243A66;border-radius:10px;padding:8px 14px;text-align:center;min-width:84px;}
-  .stat-pill .n{font-size:17px;font-weight:700;color:#fff;}
-  .stat-pill .l{font-size:11px;color:#AEB8CE;margin-top:2px;}
+  .overall-totals{display:flex;gap:8px;flex-wrap:wrap;}
+  .total-pill{background:#243A66;border-radius:10px;padding:8px 12px;text-align:center;min-width:100px;}
+  .total-pill .n{font-size:13px;font-weight:700;color:#fff;}
+  .total-pill .l{font-size:10.5px;color:#AEB8CE;margin-top:2px;}
+  .total-pill.grand{background:#2BB5A0;color:#fff;}
+  .total-pill.grand .n{color:#fff;font-size:14px;}
+  .total-pill.grand .l{color:#E6FFF9;}
+
   .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .filter-btn{border:1px solid var(--line);background:var(--card);color:var(--text-dim);
     padding:7px 16px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;
     transition:all .15s;}
   .filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
   .filter-btn:not(.active):hover{border-color:var(--orange);color:var(--orange);}
+  .add-btn{background:var(--orange);color:#fff;border:none;padding:8px 16px;border-radius:999px;
+    font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;}
+  .add-btn:hover{background:#E56700;}
+
   .phase{background:var(--card);border:1px solid var(--line);border-radius:16px;
     margin-bottom:16px;overflow:hidden;}
   .phase-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;}
@@ -54,7 +63,7 @@
   .phase-title{flex:1;min-width:0;}
   .phase-title h2{margin:0;font-size:15.5px;}
   .phase-title .sub{font-size:12px;color:var(--text-dim);margin-top:1px;}
-  .phase-progress-wrap{flex:none;width:120px;text-align:left;}
+  .phase-progress-wrap{flex:none;width:130px;text-align:left;}
   .phase-progress-bar{height:6px;background:#EFEAE1;border-radius:99px;overflow:hidden;margin-bottom:4px;}
   .phase-progress-bar > div{height:100%;background:var(--teal);border-radius:99px;transition:width .3s;}
   .phase-progress-wrap .count{font-size:11px;color:var(--text-dim);}
@@ -62,45 +71,59 @@
   .phase.open .chev{transform:rotate(180deg);}
   .phase-body{border-top:1px solid var(--line);}
   .phase-body.collapsed{display:none;}
-  .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;}
+
+  .phase-totals{background:#F6F9F8;padding:12px 18px;border-top:1px solid var(--line);
+    display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;}
+  .phase-totals span{color:var(--text-dim);}
+  .phase-totals b{color:var(--text);font-weight:700;}
+
+  .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;flex-wrap:wrap;}
   .item:last-child{border-bottom:none;}
   .item.done{background:#FAFCFA;}
-  .item.done .item-name{text-decoration:line-through;color:var(--text-dim);}
   .item.partial{background:#fffdf8;}
-  .chk{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid #CBD0D8;
-    margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    background:#fff;transition:all .15s;}
-  .chk.checked{background:var(--teal);border-color:var(--teal);}
-  .chk svg{width:13px;height:13px;display:none;}
-  .chk.checked svg{display:block;}
-  .item-main{flex:1;min-width:0;cursor:pointer;}
-  .item-name{font-size:14px;font-weight:600;}
-  .item-meta{font-size:12px;color:var(--text-dim);margin-top:2px;}
-  .item-desc{font-size:12.5px;color:var(--text-dim);margin-top:6px;line-height:1.6;
-    max-height:0;overflow:hidden;transition:max-height .25s ease;white-space:pre-line;}
-  .item-desc.expanded{max-height:400px;}
-  .assignee{flex:none;}
-  .assignee select{font-family:inherit;font-size:12.5px;border-radius:8px;padding:6px 10px;
-    border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
-  .assignee select.set-بدر{background:#E7F0FF;border-color:#B7CFFA;}
-  .assignee select.set-ريان{background:#FDEBD8;border-color:#F6CBA0;}
-  .assignee select.set-سليمان{background:#E4F7EE;border-color:#A9E3C4;}
-  .price{flex:none;font-size:12.5px;color:var(--text-dim);min-width:78px;text-align:left;padding-top:2px;}
-  .price b{color:var(--text);font-weight:700;}
-  .empty-msg{padding:24px;text-align:center;color:var(--text-dim);font-size:13px;}
-  footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);
-    font-size:11.5px;text-align:center;}
-  @media (max-width:640px){
-    .phase-progress-wrap{width:70px;}
-    .price{display:none;}
-    .brand{flex-direction:column;align-items:flex-start;}
-  }
+  .item-row1{flex:1;min-width:250px;display:flex;flex-direction:column;gap:6px;}
+  .item-name-input{font-size:14px;font-weight:600;border:1px dashed transparent;background:transparent;
+    padding:4px 6px;border-radius:6px;font-family:inherit;color:var(--text);width:100%;}
+  .item-name-input:hover{border-color:var(--line);background:#fff;}
+  .item-name-input:focus{border-color:var(--orange);background:#fff;outline:none;}
+  .item-desc{font-size:12px;color:var(--text-dim);padding:2px 6px;}
+  .item-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;}
+  .item-controls label{font-size:11.5px;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;}
+  .item-controls input{width:70px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;
+    font-family:inherit;font-size:12.5px;text-align:center;background:#fff;}
+  .item-controls input:focus{border-color:var(--orange);outline:none;}
+  .item-controls .tax-toggle{background:#F6F3EE;border:1px solid var(--line);border-radius:6px;
+    padding:5px 8px;font-size:11.5px;cursor:pointer;font-family:inherit;}
+  .item-controls .tax-toggle.included{background:#E4F7EE;border-color:#A9E3C4;color:#087d65;}
+  .item-controls .tax-toggle.not-included{background:#FFF1DF;border-color:#F1C98E;color:#a76100;}
+
   .status-control{flex:none;min-width:118px;}
   .status-select{border:1px solid #d7dce5;border-radius:10px;padding:9px 28px 9px 10px;
-    font-family:inherit;font-size:13px;background:#fff;cursor:pointer;}
+    font-family:inherit;font-size:13px;background:#fff;cursor:pointer;width:100%;}
   .status-select.status-done{background:#e7f6f0;border-color:#b8e3d4;color:#087d65;}
   .status-select.status-partial{background:#fff1df;border-color:#f1c98e;color:#a76100;}
   .status-select.status-pending{background:#f6f6f4;color:#555;}
+
+  .item-right{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:130px;}
+  .item-total{font-size:13px;font-weight:700;color:var(--text);}
+  .item-total-tax{font-size:11px;color:var(--text-dim);}
+  .item-actions{display:flex;gap:6px;align-items:center;}
+  .assignee-sel{font-family:inherit;font-size:11.5px;border-radius:6px;padding:4px 6px;
+    border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
+  .assignee-sel.set-بدر{background:#E7F0FF;border-color:#B7CFFA;}
+  .assignee-sel.set-ريان{background:#FDEBD8;border-color:#F6CBA0;}
+  .assignee-sel.set-سليمان{background:#E4F7EE;border-color:#A9E3C4;}
+  .del-btn{background:transparent;border:1px solid #F1C0C0;color:#D64545;border-radius:6px;
+    width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1;padding:0;font-family:inherit;}
+  .del-btn:hover{background:#FDEAEA;}
+
+  .empty-msg{padding:24px;text-align:center;color:var(--text-dim);font-size:13px;}
+  footer{max-width:1000px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);
+    font-size:11.5px;text-align:center;}
+  @media (max-width:640px){
+    .phase-progress-wrap{width:70px;}
+    .item-right{min-width:100%;align-items:flex-start;}
+  }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   .saving-pulse{animation:pulse 1s infinite;}
 </style>
@@ -116,7 +139,7 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
-        <button id="refreshBtn" title="تحديث يدوي" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
+        <button id="refreshBtn" title="تحديث" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
         <span id="saveStatus">جاري الاتصال...</span>
         أنا:
         <select id="whoAmI">
@@ -137,12 +160,10 @@
         <div class="pct" id="ringPct">0%</div>
       </div>
       <div class="overall-text">
-        <div class="big" id="overallCount">0 / 0 بند مكتمل</div>
-        <div class="small">عبر المراحل الثلاث كلها</div>
+        <div class="big" id="overallCount">0 / 0 بند</div>
+        <div class="small">عبر المراحل الثلاث</div>
       </div>
-      <div class="stat-pill"><div class="n" id="pillBadr">0</div><div class="l">بدر</div></div>
-      <div class="stat-pill"><div class="n" id="pillRayan">0</div><div class="l">ريان</div></div>
-      <div class="stat-pill"><div class="n" id="pillSulaiman">0</div><div class="l">سليمان</div></div>
+      <div class="overall-totals" id="overallTotals"></div>
     </div>
   </div>
 </header>
@@ -159,74 +180,23 @@
   <div id="phases"></div>
 </div>
 
-<footer>تحديث لحظي عبر Supabase Realtime — أي تعديل يظهر فوراً لجميع الأطراف.</footer>
+<footer>مزامنة لحظية عبر Supabase — أي تعديل يظهر فوراً لجميع الأطراف.</footer>
 </div>
 
 <script>
-const PHASES = [
-  { id:"p1", title:"المرحلة الأولى", sub:"تجهيزات المبنى بالهوية البصرية", items:[
-    {n:"لوحة اكريليك", d:"لوحة اكريليك ابيض مع سلسلة وحلقات مقاس 60×30 سم سماكة 6 مم طباعة يوفي وجهان كامل مع التركيب بالكراج", u:"وحدة", q:80, price:165, total:13200},
-    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + نساء مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
-    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + رجال مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
-    {n:"لوحة زنكور مضيء", d:"لوحات إرشادية جانبية مضيئة لدورات المياه - ركن القهوة - المستودع - غرفة الاتصالات - مصلى النساء", u:"وحدة", q:20, price:1500, total:30000},
-    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة مقاس 50×50 وجهان حمامات", u:"وحدة", q:5, price:900, total:4500},
-    {n:"لوحة اكريليك", d:"لوحة مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:2800, total:2800},
-    {n:"حروف", d:"حروف مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:1000, total:1000},
-    {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 170×340 سم الدور (3 و4)", u:"وحدة", q:4, price:3400, total:13600},
-    {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 110×210 سم الدور (4 و5)", u:"وحدة", q:2, price:1500, total:3000},
-    {n:"الاوتوكاد", d:"أعمال الاوتوكاد", u:"وحدة", q:1, price:4000, total:4000},
-    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات الطابق الأرضي", u:"وحدة", q:12, price:800, total:9600},
-    {n:"لوحات رسم للأدوار", d:"من الدور 3 إلى 5", u:"وحدة", q:12, price:3500, total:42000},
-  ]},
-  { id:"p2", title:"المرحلة الثانية", sub:"تجهيزات مكتب الرئيس وغرفة الاجتماعات", items:[
-    {n:"قاعدة رخامية", d:"قاعدة رخامية بهوية البنك", u:"وحدة", q:1, price:2000, total:2000},
-    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:5, price:689, total:3445},
-    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:2, price:680, total:1360},
-    {n:"لوحة فنية كبيرة", d:"لوحة فنية كبيرة — مكتب إبراهيم الراشد", u:"وحدة", q:1, price:7500, total:7500},
-    {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:6000, total:12000},
-    {n:"لوحتين فنية صغيرة", d:"لوحتين فنية صغيرة — مكتب أ. إبراهيم الراشد", u:"وحدة", q:2, price:2500, total:5000},
-    {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:4000, total:8000},
-    {n:"اتعاب نهى", d:"اتعاب الفنانة نهى الجريد", u:"وحدة", q:1, price:10000, total:10000},
-    {n:"نباتات طبيعية", d:"6 نباتات طبيعية (بدون أحواض) — الأحواض تُسعّر بشكل منفصل", u:"وحدة", q:6, price:158.33, total:950},
-    {n:"أحواض نباتات", d:"أحواض نباتات لمكتب الرئيس والمختصر (653 + 400 قيمة الأحواض)", u:"وحدة", q:6, price:175.5, total:1053},
-    {n:"طاولة كونسول وديكورات كلاسيكية", d:"طاولة كونسول لاستقبال مكتب الرئيس مع قطع تحف/ديكور كلاسيكية مرافقة (مرايا خشب انتيك، كوستار، تمريات زجاج، أبواب خشب مزخرفة، علبة فخار، مدخل خشب بنقش وردة، طقم صحن المنيوم، رسوم توصيل)", u:"وحدة", q:1, price:2476.09, total:2476.09},
-    {n:"فرشة صغيرة", d:"فرشة صغيرة لمكتب الرئيس / المختصر", u:"وحدة", q:1, price:565.23, total:565.23},
-    {n:"فرشة كبيرة", d:"فرشة كبيرة لمكتب الرئيس", u:"وحدة", q:1, price:1043.47, total:1043.47},
-    {n:"تجهيزات دورة مياه الرئيس ونائب الرئيس", d:"طقم: معطرات + فوط + حاويات (نسختان: للرئيس ولنائب الرئيس) والخداديات", u:"طقم", q:2, price:1374.79, total:2749.58},
-    {n:"معلاق بشت", d:"معلاق بشت لمكتب الرئيس", u:"وحدة", q:1, price:17.39, total:17.39},
-    {n:"معطرات", d:"معطرات إضافية", u:"وحدة", q:1, price:3417.39, total:3417.39},
-    {n:"سلال مهملات جلدية رسمية", d:"استبدال جميع سلال المهملات في مكتب الرئيس وغرفة الاجتماعات بسلال رسمية من الجلد", u:"وحدة", q:5, price:140, total:700},
-    {n:"سماعات صوتية", d:"سماعات صوتية للمختصر", u:"وحدة", q:1, price:520.87, total:520.87},
-    {n:"تجهيزات ركن رياضي", d:"أوزان مودرن ستايل + إضاءة + مناشف رياضية بسيطة للمختصر", u:"طقم", q:1, price:475, total:475},
-    {n:"رسوم عمالة", d:"نجارة + نقل وتعديل الدولاب + نقل جهاز المشين وإزالة الكتب والشاشة", u:"عمل", q:2, price:600, total:1200},
-    {n:"نباتات صغيرة بأصص", d:"6 نباتات صغيرة بأصص (بوتس)", u:"وحدة", q:6, price:18, total:108},
-    {n:"صندوق سجاد صغيرة", d:"صندوق/قطعة سجاد صغيرة", u:"وحدة", q:1, price:1000, total:1000},
-    {n:"فواحة بوباب", d:"فواحة عطرية (بوباب)", u:"وحدة", q:2, price:850, total:1700},
-    {n:"ليد إضاءة", d:"إضاءة LED", u:"طقم", q:1, price:309, total:309},
-    {n:"طوفريتين", d:"طوفريتين (قطعتان)", u:"وحدة", q:2, price:150, total:300},
-    {n:"مات ووطاية لدورة المياه", d:"مات ووطاية لدورة المياه", u:"طقم", q:2, price:500, total:1000},
-    {n:"كرسي استرخاء", d:"كرسي استرخاء", u:"كرسي", q:1, price:10000, total:10000},
-    {n:"أعلام السعودية", d:"أعلام المملكة العربية السعودية", u:"علم", q:4, price:650, total:2600},
-    {n:"أعلام بنك المنشآت", d:"أعلام بهوية بنك المنشآت", u:"علم", q:4, price:700, total:2800},
-  ]},
-  { id:"p3", title:"المرحلة الثالثة", sub:"اللوحات الخارجية للمبنى", items:[
-    {n:"لوحة واجهة المبنى", d:"عرض 4.2 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:6032.88},
-    {n:"لوحة البوابة", d:"عرض 4 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:2352},
-    {n:"لوحة المواقف", d:"عرض 2.8 م وارتفاع 2.6 م", u:"وحدة", q:1, price:320, total:2329.6},
-    {n:"لوحة الاستقبال", d:"عرض 2.5 م وارتفاع 1.5 م", u:"وحدة", q:1, price:320, total:1200},
-    {n:"إيجار لوحة واجهة المبنى", d:"إيجار سنوي — لوحة واجهة المبنى", u:"وحدة", q:1, price:10000, total:58800},
-    {n:"إيجار لوحة البوابة", d:"إيجار سنوي — لوحة البوابة", u:"وحدة", q:1, price:10000, total:56000},
-    {n:"إيجار لوحة المواقف", d:"إيجار سنوي — لوحة المواقف", u:"وحدة", q:1, price:7000, total:50960},
-    {n:"إيجار لوحة الاستقبال", d:"إيجار سنوي — لوحة الاستقبال", u:"وحدة", q:1, price:7000, total:26250},
-  ]},
-];
-
-PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
-
 const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
+const TAX_RATE = 0.15;
+
+// ترتيب المراحل: الثانية أولاً
+const PHASE_ORDER = [
+  { key:"p2", title:"المرحلة الأولى", sub:"تجهيزات مكتب الرئيس وغرفة الاجتماعات" },
+  { key:"p1", title:"المرحلة الثانية", sub:"تجهيزات المبنى بالهوية البصرية" },
+  { key:"p3", title:"المرحلة الثالثة", sub:"اللوحات الخارجية للمبنى" }
+];
 
 let state = { items: {} };
+let itemsMeta = {}; // id -> {name, description, unit, total_qty, unit_price, tax_included, phase, sort_order}
 let currentFilter = "الكل";
 let saveTimer = null;
 let saveInFlight = false;
@@ -235,7 +205,7 @@ let supabaseClient = null;
 let realtimeConnected = false;
 
 function fmt(n){ return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n); }
-function allItems(){ return PHASES.flatMap(ph => ph.items); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function setStatus(text, color, pulse){
   const el = document.getElementById("saveStatus");
@@ -266,24 +236,43 @@ async function sbFetch(path, options = {}){
 }
 
 async function apiGet(){
-  const data = await sbFetch("procurement_items?select=id%2Cdone%2Cassignee%2Ccompleted_qty");
+  const data = await sbFetch("procurement_items?select=*");
   const items = {};
+  const meta = {};
   (data || []).forEach(row => {
     items[row.id] = {
       done: !!row.done,
       assignee: row.assignee || "",
-      completedQty: Number.isFinite(Number(row.completed_qty)) ? Number(row.completed_qty) : 0
+      completedQty: Number(row.completed_qty) || 0
+    };
+    meta[row.id] = {
+      name: row.name || "",
+      description: row.description || "",
+      unit: row.unit || "وحدة",
+      total_qty: Number(row.total_qty) || 1,
+      unit_price: Number(row.unit_price) || 0,
+      tax_included: !!row.tax_included,
+      phase: row.phase || "p1",
+      sort_order: Number(row.sort_order) || 0
     };
   });
-  return { items };
+  return { items, meta };
 }
 
 async function apiPut(data){
-  const rows = Object.entries(data.items || {}).map(([id, s]) => ({
+  const rows = Object.entries(data).map(([id, s]) => ({
     id,
     done: !!s.done,
     assignee: s.assignee || "",
     completed_qty: Math.max(0, Number(s.completedQty || 0)),
+    name: s.name || "",
+    description: s.description || "",
+    unit: s.unit || "وحدة",
+    total_qty: Math.max(0, Number(s.total_qty || 0)),
+    unit_price: Math.max(0, Number(s.unit_price || 0)),
+    tax_included: !!s.tax_included,
+    phase: s.phase || "p1",
+    sort_order: Number(s.sort_order || 0),
     updated_at: new Date().toISOString()
   }));
   if(!rows.length) return;
@@ -307,18 +296,32 @@ function applyRemoteRow(row){
     assignee: row.assignee || "",
     completedQty: Number(row.completed_qty) || 0
   };
+  itemsMeta[row.id] = {
+    name: row.name || "",
+    description: row.description || "",
+    unit: row.unit || "وحدة",
+    total_qty: Number(row.total_qty) || 1,
+    unit_price: Number(row.unit_price) || 0,
+    tax_included: !!row.tax_included,
+    phase: row.phase || "p1",
+    sort_order: Number(row.sort_order) || 0
+  };
 }
 
 function subscribeRealtime(){
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
   supabaseClient
     .channel('procurement-changes')
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'procurement_items' },
       (payload) => {
         if(saveInFlight || dirtyLocal) return;
-        applyRemoteRow(payload.new);
+        if(payload.eventType === 'DELETE'){
+          const oldId = payload.old && payload.old.id;
+          if(oldId){ delete state.items[oldId]; delete itemsMeta[oldId]; }
+        } else {
+          applyRemoteRow(payload.new);
+        }
         render();
         setStatus("تحديث لحظي ✓", "#8DE0C8");
       }
@@ -337,14 +340,12 @@ function subscribeRealtime(){
     });
 
   setInterval(async () => {
-    if(realtimeConnected) return;
-    if(dirtyLocal || saveInFlight) return;
+    if(realtimeConnected || dirtyLocal || saveInFlight) return;
     try{
       const remote = await apiGet();
-      if(remote && remote.items){
-        state = remote;
-        render();
-      }
+      state = { items: remote.items };
+      itemsMeta = remote.meta;
+      render();
     }catch(e){ console.warn("fallback sync failed", e); }
   }, 30000);
 }
@@ -354,9 +355,8 @@ async function loadState(){
   try{
     setStatus("جاري التحديث...", "#CDD5E6", true);
     const remote = await apiGet();
-    if(remote && remote.items){
-      state = remote;
-    }
+    state = { items: remote.items };
+    itemsMeta = remote.meta;
     if(!realtimeConnected) setStatus("متصل ✓", "#8DE0C8");
   }catch(e){
     console.log("remote load failed", e);
@@ -365,27 +365,25 @@ async function loadState(){
   render();
 }
 
-function queueSave(){
+function queueSave(ids){
   dirtyLocal = true;
   setStatus("جاري الحفظ...", "#FFD39B", true);
+  const idsArr = Array.isArray(ids) ? ids : Object.keys(state.items);
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
+    const payload = {};
+    idsArr.forEach(id => {
+      payload[id] = Object.assign({}, state.items[id] || {}, itemsMeta[id] || {});
+    });
     try{
-      await apiPut(state);
+      await apiPut(payload);
       setStatus(realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓", "#8DE0C8");
     }catch(e){
       console.error("save failed", e);
-      setStatus("فشل الحفظ — إعادة محاولة", "#FFB4A2");
+      setStatus("فشل الحفظ", "#FFB4A2");
       dirtyLocal = true;
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(async ()=>{
-        if(dirtyLocal && !saveInFlight){
-          try{ await apiPut(state); setStatus("محفوظ ✓", "#8DE0C8"); }
-          catch(err){ console.error("retry failed", err); setStatus("فشل الحفظ", "#FFB4A2"); }
-        }
-      }, 2500);
     }
-  }, 200);
+  }, 400);
 }
 
 function getItemState(id){
@@ -393,10 +391,43 @@ function getItemState(id){
   return { done:false, assignee:"", completedQty:0 };
 }
 
+function getItemMeta(id){
+  if(itemsMeta[id]) return Object.assign({name:"",description:"",unit:"وحدة",total_qty:1,unit_price:0,tax_included:false,phase:"p1",sort_order:0}, itemsMeta[id]);
+  return { name:"", description:"", unit:"وحدة", total_qty:1, unit_price:0, tax_included:false, phase:"p1", sort_order:0 };
+}
+
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  queueSave();
+  queueSave([id]);
 }
+
+function setItemMeta(id, patch){
+  itemsMeta[id] = Object.assign({}, getItemMeta(id), patch);
+  queueSave([id]);
+}
+
+function calcItem(id){
+  const m = getItemMeta(id);
+  const s = getItemState(id);
+  const line = Number(m.total_qty) * Number(m.unit_price);
+  const lineWithoutTax = m.tax_included ? line / (1 + TAX_RATE) : line;
+  const lineTax = m.tax_included ? (line - lineWithoutTax) : (line * TAX_RATE);
+  const lineWithTax = m.tax_included ? line : (line + lineTax);
+  const completed = Math.min(Number(m.total_qty), Math.max(0, Number(s.completedQty || 0)));
+  const pct = m.total_qty > 0 ? (completed / m.total_qty) : 0;
+  return {
+    total_qty: Number(m.total_qty),
+    unit_price: Number(m.unit_price),
+    line_without_tax: lineWithoutTax,
+    line_tax: lineTax,
+    line_with_tax: lineWithTax,
+    completed,
+    pct,
+    done: completed >= Number(m.total_qty) && Number(m.total_qty) > 0
+  };
+}
+
+function allIds(){ return Object.keys(itemsMeta); }
 
 function render(){
   renderOverall();
@@ -404,32 +435,43 @@ function render(){
 }
 
 function renderOverall(){
-  const items = allItems();
-  const total = items.length;
-  const completed = items.filter(it => getItemState(it.id).completedQty >= it.q).length;
-  const purchasedQty = items.reduce((sum,it)=>sum + Math.min(it.q, Math.max(0, Number(getItemState(it.id).completedQty || 0))), 0);
-  const totalQty = items.reduce((sum,it)=>sum + it.q, 0);
-  const pct = totalQty ? Math.round((purchasedQty/totalQty)*100) : 0;
+  const ids = allIds();
+  let grandWithout = 0, grandTax = 0, grandWith = 0;
+  let completedCount = 0, totalQty = 0, purchasedQty = 0;
+  const counts = {"بدر":0,"ريان":0,"سليمان":0};
 
-  document.getElementById("overallCount").textContent = `${completed} / ${total} بند مكتمل`;
+  ids.forEach(id => {
+    const c = calcItem(id);
+    grandWithout += c.line_without_tax;
+    grandTax += c.line_tax;
+    grandWith += c.line_with_tax;
+    totalQty += c.total_qty;
+    purchasedQty += c.completed;
+    if(c.done){
+      completedCount++;
+      const s = getItemState(id);
+      if(counts.hasOwnProperty(s.assignee)) counts[s.assignee]++;
+    }
+  });
+
+  const pct = totalQty ? Math.round((purchasedQty / totalQty) * 100) : 0;
+  document.getElementById("overallCount").textContent = `${completedCount} / ${ids.length} بند مكتمل`;
   document.getElementById("ringPct").textContent = pct + "%";
   const circumference = 169.6;
-  document.getElementById("ringProgress").style.strokeDashoffset = String(circumference - (circumference*pct/100));
+  document.getElementById("ringProgress").style.strokeDashoffset = String(circumference - (circumference * pct / 100));
 
-  const counts = {"بدر":0,"ريان":0,"سليمان":0};
-  items.forEach(it=>{
-    const s = getItemState(it.id);
-    if(s.completedQty >= it.q && counts.hasOwnProperty(s.assignee)) counts[s.assignee]++;
-  });
-  document.getElementById("pillBadr").textContent = counts["بدر"];
-  document.getElementById("pillRayan").textContent = counts["ريان"];
-  document.getElementById("pillSulaiman").textContent = counts["سليمان"];
+  document.getElementById("overallTotals").innerHTML = `
+    <div class="total-pill"><div class="n">${fmt(grandWithout)}</div><div class="l">بدون ضريبة</div></div>
+    <div class="total-pill"><div class="n">${fmt(grandTax)}</div><div class="l">الضريبة 15%</div></div>
+    <div class="total-pill grand"><div class="n">${fmt(grandWith)}</div><div class="l">الإجمالي مع الضريبة</div></div>
+  `;
 }
 
-function itemPassesFilter(it){
-  const s = getItemState(it.id);
+function itemPassesFilter(id){
+  const s = getItemState(id);
+  const c = calcItem(id);
   if(currentFilter === "الكل") return true;
-  if(currentFilter === "متبقي") return s.completedQty < it.q;
+  if(currentFilter === "متبقي") return !c.done;
   if(currentFilter === "غير محدد") return !s.assignee;
   return s.assignee === currentFilter;
 }
@@ -438,13 +480,22 @@ function renderPhases(){
   const container = document.getElementById("phases");
   container.innerHTML = "";
 
-  PHASES.forEach((ph, idx) => {
-    const phDone = ph.items.filter(it=>getItemState(it.id).completedQty >= it.q).length;
-    const phTotal = ph.items.length;
-    const phPurchased = ph.items.reduce((sum,it)=>sum + Math.min(it.q, Math.max(0, Number(getItemState(it.id).completedQty || 0))), 0);
-    const phQty = ph.items.reduce((sum,it)=>sum + it.q, 0);
-    const phPct = phQty ? Math.round((phPurchased/phQty)*100) : 0;
-    const visibleItems = ph.items.filter(itemPassesFilter);
+  PHASE_ORDER.forEach((ph, idx) => {
+    const phaseIds = allIds().filter(id => getItemMeta(id).phase === ph.key)
+      .sort((a,b) => getItemMeta(a).sort_order - getItemMeta(b).sort_order);
+
+    let phaseWithout = 0, phaseTax = 0, phaseWith = 0, phaseDone = 0, phaseTotalQty = 0, phasePurchased = 0;
+    phaseIds.forEach(id => {
+      const c = calcItem(id);
+      phaseWithout += c.line_without_tax;
+      phaseTax += c.line_tax;
+      phaseWith += c.line_with_tax;
+      phaseTotalQty += c.total_qty;
+      phasePurchased += c.completed;
+      if(c.done) phaseDone++;
+    });
+    const phPct = phaseTotalQty ? Math.round((phasePurchased / phaseTotalQty) * 100) : 0;
+    const visibleIds = phaseIds.filter(itemPassesFilter);
 
     const phaseEl = document.createElement("div");
     phaseEl.className = "phase open";
@@ -454,25 +505,36 @@ function renderPhases(){
     head.innerHTML = `
       <div class="phase-num">${idx+1}</div>
       <div class="phase-title">
-        <h2>${ph.title}</h2>
-        <div class="sub">${ph.sub}</div>
+        <h2>${escapeHtml(ph.title)}</h2>
+        <div class="sub">${escapeHtml(ph.sub)}</div>
       </div>
       <div class="phase-progress-wrap">
         <div class="phase-progress-bar"><div style="width:${phPct}%"></div></div>
-        <div class="count">${phPurchased}/${phQty} كمية مشتراة · ${phDone}/${phTotal} بند مكتمل</div>
+        <div class="count">${phasePurchased}/${phaseTotalQty} كمية · ${phaseDone}/${phaseIds.length} بند</div>
       </div>
       <div class="chev">▾</div>
     `;
     const body = document.createElement("div");
     body.className = "phase-body";
 
-    if(visibleItems.length === 0){
-      body.innerHTML = `<div class="empty-msg">لا توجد بنود مطابقة للفلتر الحالي في هذه المرحلة</div>`;
+    if(visibleIds.length === 0){
+      body.innerHTML = `<div class="empty-msg">لا توجد بنود مطابقة للفلتر الحالي</div>`;
     }else{
-      visibleItems.forEach(it => body.appendChild(renderItemRow(it)));
+      visibleIds.forEach(id => body.appendChild(renderItemRow(id)));
     }
 
-    head.addEventListener("click", ()=>{
+    // إجماليات المرحلة
+    const totals = document.createElement("div");
+    totals.className = "phase-totals";
+    totals.innerHTML = `
+      <span>إجمالي المرحلة:</span>
+      <span>بدون ضريبة: <b>${fmt(phaseWithout)}</b> ريال</span>
+      <span>الضريبة: <b>${fmt(phaseTax)}</b> ريال</span>
+      <span>مع الضريبة: <b>${fmt(phaseWith)}</b> ريال</span>
+    `;
+    body.appendChild(totals);
+
+    head.addEventListener("click", () => {
       phaseEl.classList.toggle("open");
       body.classList.toggle("collapsed");
     });
@@ -483,32 +545,64 @@ function renderPhases(){
   });
 }
 
-function renderItemRow(it){
-  const s = getItemState(it.id);
-  const currentQty = Math.min(it.q, Math.max(0, Number(s.completedQty || 0)));
+function renderItemRow(id){
+  const s = getItemState(id);
+  const m = getItemMeta(id);
+  const c = calcItem(id);
   const row = document.createElement("div");
-  row.className = "item" + (currentQty >= it.q ? " done" : currentQty > 0 ? " partial" : "");
+  row.className = "item" + (c.done ? " done" : c.completed > 0 ? " partial" : "");
 
+  // اليمين (اليمين في RTL) - معلومات وتحكم
+  const right = document.createElement("div");
+  right.className = "item-right";
+  right.innerHTML = `
+    <div class="item-total">${fmt(c.line_with_tax)} ريال</div>
+    <div class="item-total-tax">${m.tax_included ? 'شامل الضريبة' : 'بدون ضريبة: ' + fmt(c.line_without_tax) + ' + ' + fmt(c.line_tax)}</div>
+    <div class="item-actions"></div>
+  `;
+  const actionsEl = right.querySelector(".item-actions");
+  
+  const assignSel = document.createElement("select");
+  assignSel.className = "assignee-sel " + (s.assignee ? "set-" + s.assignee : "");
+  assignSel.innerHTML = `<option value="">غير محدد</option><option value="بدر">بدر</option><option value="ريان">ريان</option><option value="سليمان">سليمان</option>`;
+  assignSel.value = s.assignee || "";
+  assignSel.addEventListener("change", () => setItemState(id, {assignee: assignSel.value}));
+  actionsEl.appendChild(assignSel);
+
+  const delBtn = document.createElement("button");
+  delBtn.className = "del-btn";
+  delBtn.title = "حذف البند";
+  delBtn.textContent = "🗑";
+  delBtn.addEventListener("click", async () => {
+    if(!confirm(`حذف البند "${m.name}" نهائياً؟`)) return;
+    try{
+      await sbFetch("procurement_items?id=eq." + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: sbHeaders()
+      });
+      delete state.items[id];
+      delete itemsMeta[id];
+      render();
+    }catch(e){ alert("فشل الحذف: " + e.message); }
+  });
+  actionsEl.appendChild(delBtn);
+
+  // اليسار - الحالة
   const statusWrap = document.createElement("div");
   statusWrap.className = "status-control";
   const statusSel = document.createElement("select");
-  statusSel.className = "status-select " + (currentQty >= it.q ? "status-done" : currentQty > 0 ? "status-partial" : "status-pending");
-  statusSel.innerHTML = `
-    <option value="0">غير مكتمل</option>
-    <option value="partial">مكتمل جزئي</option>
-    <option value="full">مكتمل</option>`;
-  statusSel.value = currentQty >= it.q ? "full" : currentQty > 0 ? "partial" : "0";
-  statusSel.addEventListener("click", e=>e.stopPropagation());
-  statusSel.addEventListener("change", (e)=>{
-    e.stopPropagation();
+  statusSel.className = "status-select " + (c.done ? "status-done" : c.completed > 0 ? "status-partial" : "status-pending");
+  statusSel.innerHTML = `<option value="0">غير مكتمل</option><option value="partial">مكتمل جزئي</option><option value="full">مكتمل</option>`;
+  statusSel.value = c.done ? "full" : c.completed > 0 ? "partial" : "0";
+  statusSel.addEventListener("change", () => {
     let qty = 0;
-    if(statusSel.value === "full") qty = it.q;
-    if(statusSel.value === "partial") {
-      const answer = window.prompt(`كم تم إنجازه من ${it.q} ${it.u}؟`, String(currentQty > 0 ? currentQty : 1));
+    if(statusSel.value === "full") qty = c.total_qty;
+    if(statusSel.value === "partial"){
+      const answer = prompt(`كم تم إنجازه من ${c.total_qty} ${m.unit}؟`, String(c.completed > 0 ? c.completed : 1));
       if(answer === null){ render(); return; }
       qty = Number(answer);
-      if(!Number.isFinite(qty) || qty < 1 || qty > it.q || !Number.isInteger(qty)){
-        alert(`أدخل رقمًا صحيحًا من 1 إلى ${it.q}`);
+      if(!Number.isFinite(qty) || qty < 0 || qty > c.total_qty){
+        alert(`أدخل رقمًا بين 0 و ${c.total_qty}`);
         render();
         return;
       }
@@ -516,77 +610,21 @@ function renderItemRow(it){
     let assignee = s.assignee;
     const who = document.getElementById("whoAmI").value;
     if(qty > 0 && !assignee && who) assignee = who;
-    setItemState(it.id, {done: qty >= it.q, completedQty: qty, assignee});
+    setItemState(id, {done: qty >= c.total_qty && c.total_qty > 0, completedQty: qty, assignee});
     render();
   });
   statusWrap.appendChild(statusSel);
 
-  const main = document.createElement("div");
-  main.className = "item-main";
-  main.innerHTML = `
-    <div class="item-name">${it.n}</div>
-    <div class="item-meta">${it.u} × ${it.q}</div>
-    <div class="item-desc">${it.d}</div>
-  `;
-  main.addEventListener("click", ()=>{
-    main.querySelector(".item-desc").classList.toggle("expanded");
-  });
+  // الوسط - الاسم والوصف والتحكم
+  const mid = document.createElement("div");
+  mid.className = "item-row1";
 
-  const price = document.createElement("div");
-  price.className = "price";
-  price.innerHTML = `<b>${fmt(it.total)}</b><br>ريال`;
+  const nameInput = document.createElement("input");
+  nameInput.className = "item-name-input";
+  nameInput.type = "text";
+  nameInput.value = m.name;
+  nameInput.placeholder = "اسم البند";
+  nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); render(); });
+  mid.appendChild(nameInput);
 
-  const assignWrap = document.createElement("div");
-  assignWrap.className = "assignee";
-  const sel = document.createElement("select");
-  sel.className = s.assignee ? "set-" + s.assignee : "";
-  sel.innerHTML = `
-    <option value="">غير محدد</option>
-    <option value="بدر">بدر</option>
-    <option value="ريان">ريان</option>
-    <option value="سليمان">سليمان</option>
-  `;
-  sel.value = s.assignee || "";
-  sel.addEventListener("click", e=>e.stopPropagation());
-  sel.addEventListener("change", ()=>{
-    setItemState(it.id, {assignee: sel.value});
-    render();
-  });
-  assignWrap.appendChild(sel);
-
-  row.appendChild(statusWrap);
-  row.appendChild(main);
-  row.appendChild(price);
-  row.appendChild(assignWrap);
-  return row;
-}
-
-document.getElementById("filters").addEventListener("click", (e)=>{
-  const btn = e.target.closest(".filter-btn");
-  if(!btn) return;
-  currentFilter = btn.dataset.f;
-  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active", b===btn));
-  renderPhases();
-});
-
-document.getElementById("whoAmI").addEventListener("change", (e)=>{
-  localStorage.setItem("sme-tracker-who", e.target.value);
-});
-
-document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
-
-(async function(){
-  const who = localStorage.getItem("sme-tracker-who");
-  if(who) document.getElementById("whoAmI").value = who;
-  render();
-  try{
-    await loadState();
-    subscribeRealtime();
-  }catch(e){
-    console.error(e);
-    setStatus("خطأ في الاتصال", "#FFB4A2");
-  }
-})();
-</script>
-</body>
-</html>
+  const descDiv
