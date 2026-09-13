@@ -27,22 +27,41 @@
     padding:6px 10px;font-size:13px;font-family:inherit;}
   #saveStatus{font-size:12px;min-width:120px;text-align:center;padding:5px 10px;border-radius:6px;
     background:#1a2846;transition:all .2s;}
+
+  /* ===== الملخص المالي الرئيسي ===== */
+  .financial-summary{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;background:#1D2C4E;border-radius:14px;padding:16px 18px;
+  }
+  .fs-card{
+    background:#243A66;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;
+  }
+  .fs-card.spent{background:linear-gradient(135deg,#2BB5A0,#1D8E7B);}
+  .fs-card.remaining{background:linear-gradient(135deg,#FF7704,#E56300);}
+  .fs-card.total{background:#33436B;}
+  .fs-card .fs-label{font-size:11.5px;color:#CDD5E6;opacity:.95;}
+  .fs-card.spent .fs-label,
+  .fs-card.remaining .fs-label{color:#fff;opacity:.9;}
+  .fs-card .fs-amount{font-size:22px;font-weight:800;color:#fff;margin-top:4px;
+    direction:ltr;text-align:left;font-family:'Segoe UI',sans-serif;
+    font-variant-numeric:lining-nums tabular-nums;}
+  .fs-card .fs-cur{font-size:11px;color:#CDD5E6;font-weight:400;margin-inline-start:4px;}
+  .fs-card .fs-pct{font-size:11px;color:#E6FFF9;margin-top:2px;}
+  .fs-card.spent .fs-pct{color:#E6FFF9;}
+  .fs-card.remaining .fs-pct{color:#FFF1DF;}
+  .fs-card .fs-bar{height:3px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:8px;overflow:hidden;}
+  .fs-card .fs-bar > div{height:100%;background:#fff;border-radius:99px;transition:width .3s;}
+
+  /* ===== الشريط العلوي ===== */
   .overall{display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;
     padding:16px 18px;flex-wrap:wrap;}
   .ring{position:relative;width:64px;height:64px;flex:none;}
   .ring svg{transform:rotate(-90deg);}
   .ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:700;font-family:'Segoe UI',sans-serif;}
-  .overall-text{flex:1;min-width:180px;}
-  .overall-text .big{font-size:19px;font-weight:700;}
+    font-size:14px;font-weight:700;font-family:'Segoe UI',sans-serif;color:#fff;}
+  .overall-text{flex:1;min-width:180px;color:#fff;}
+  .overall-text .big{font-size:17px;font-weight:700;}
   .overall-text .small{font-size:12.5px;color:#AEB8CE;margin-top:2px;}
-  .overall-totals{display:flex;gap:8px;flex-wrap:wrap;}
-  .total-pill{background:#243A66;border-radius:10px;padding:8px 12px;text-align:center;min-width:100px;}
-  .total-pill .n{font-size:13px;font-weight:700;color:#fff;direction:ltr;font-family:'Segoe UI',sans-serif;}
-  .total-pill .l{font-size:10.5px;color:#AEB8CE;margin-top:2px;}
-  .total-pill.grand{background:#2BB5A0;color:#fff;}
-  .total-pill.grand .n{color:#fff;font-size:14px;}
-  .total-pill.grand .l{color:#E6FFF9;}
 
   .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
   .filter-btn{border:1px solid var(--line);background:var(--card);color:var(--text-dim);
@@ -75,6 +94,8 @@
   .phase-totals span{color:var(--text-dim);}
   .phase-totals b{color:var(--text);font-weight:700;}
   .phase-totals .num{direction:ltr;display:inline-block;font-family:'Segoe UI',sans-serif;}
+  .phase-totals .spent-tag{color:#1D8E7B;font-weight:700;}
+  .phase-totals .rem-tag{color:#a76100;font-weight:700;}
 
   .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;flex-wrap:wrap;}
   .item:last-child{border-bottom:none;}
@@ -115,11 +136,13 @@
   .status-select.status-partial{background:#fff1df;border-color:#f1c98e;color:#a76100;}
   .status-select.status-pending{background:#f6f6f4;color:#555;}
 
-  .item-right{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:130px;}
+  .item-right{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:140px;}
   .item-total{font-size:13px;font-weight:700;color:var(--text);direction:ltr;
     font-family:'Segoe UI',sans-serif;font-variant-numeric:lining-nums tabular-nums;}
   .item-total-tax{font-size:11px;color:var(--text-dim);direction:ltr;text-align:left;
     font-family:'Segoe UI',sans-serif;font-variant-numeric:lining-nums tabular-nums;}
+  .item-spent-info{font-size:11px;color:#1D8E7B;direction:ltr;text-align:left;
+    font-family:'Segoe UI',sans-serif;font-variant-numeric:lining-nums tabular-nums;font-weight:600;}
   .item-actions{display:flex;gap:6px;align-items:center;}
   .assignee-sel{font-family:inherit;font-size:11.5px;border-radius:6px;padding:4px 6px;
     border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
@@ -136,6 +159,7 @@
   @media (max-width:640px){
     .phase-progress-wrap{width:70px;}
     .item-right{min-width:100%;align-items:flex-start;}
+    .fs-card .fs-amount{font-size:18px;}
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   .saving-pulse{animation:pulse 1s infinite;}
@@ -198,6 +222,11 @@
         </select>
       </div>
     </div>
+
+    <!-- الملخص المالي الرئيسي -->
+    <div class="financial-summary" id="financialSummary"></div>
+
+    <!-- شريط التقدم -->
     <div class="overall">
       <div class="ring">
         <svg width="64" height="64" viewBox="0 0 64 64">
@@ -211,7 +240,6 @@
         <div class="big" id="overallCount">0 / 0 بند</div>
         <div class="small">عبر المراحل الثلاث</div>
       </div>
-      <div class="overall-totals" id="overallTotals"></div>
     </div>
   </div>
 </header>
@@ -481,26 +509,30 @@ function setItemMeta(id, patch){
   queueSave([id]);
 }
 
-// ⚠️ ملاحظة: tax_included في قاعدة البيانات = "معفى من الضريبة"
-// - tax_included: false (الافتراضي) = عليه ضريبة ← يُضاف 15%
-// - tax_included: true = معفى ← لا يُضاف شي
+// حساب تفاصيل البند
 function calcItem(id){
   const m = getItemMeta(id);
   const s = getItemState(id);
   const line = Number(m.total_qty) * Number(m.unit_price);
-  const isExempt = !!m.tax_included; // معفى
-  const lineWithoutTax = line;
+  const isExempt = !!m.tax_included;
   const lineTax = isExempt ? 0 : (line * TAX_RATE);
   const lineWithTax = line + lineTax;
   const completed = Math.min(Number(m.total_qty), Math.max(0, Number(s.completedQty || 0)));
   const pct = m.total_qty > 0 ? (completed / m.total_qty) : 0;
+  const spentWithout = line * pct;
+  const spentTax = lineTax * pct;
+  const spentWith = lineWithTax * pct;
   return {
     total_qty: Number(m.total_qty),
     unit_price: Number(m.unit_price),
     isExempt,
-    line_without_tax: lineWithoutTax,
+    line_without_tax: line,
     line_tax: lineTax,
     line_with_tax: lineWithTax,
+    spent_without_tax: spentWithout,
+    spent_tax: spentTax,
+    spent_with_tax: spentWith,
+    remaining_with_tax: lineWithTax - spentWith,
     completed,
     pct,
     done: completed >= Number(m.total_qty) && Number(m.total_qty) > 0
@@ -510,36 +542,65 @@ function calcItem(id){
 function allIds(){ return Object.keys(itemsMeta); }
 
 function render(){
-  renderOverall();
+  renderFinancialSummary();
+  renderProgress();
   renderPhases();
 }
 
-function renderOverall(){
+function renderFinancialSummary(){
   const ids = allIds();
-  let grandWithout = 0, grandTax = 0, grandWith = 0;
-  let completedCount = 0, totalQty = 0, purchasedQty = 0;
+  let totalWithout = 0, totalTax = 0, totalWith = 0;
+  let spentWithout = 0, spentTax = 0, spentWith = 0;
 
   ids.forEach(id => {
     const c = calcItem(id);
-    grandWithout += c.line_without_tax;
-    grandTax += c.line_tax;
-    grandWith += c.line_with_tax;
+    totalWithout += c.line_without_tax;
+    totalTax += c.line_tax;
+    totalWith += c.line_with_tax;
+    spentWithout += c.spent_without_tax;
+    spentTax += c.spent_tax;
+    spentWith += c.spent_with_tax;
+  });
+
+  const remainingWith = totalWith - spentWith;
+  const spentPct = totalWith > 0 ? Math.round((spentWith / totalWith) * 100) : 0;
+  const remPct = 100 - spentPct;
+
+  document.getElementById("financialSummary").innerHTML = `
+    <div class="fs-card spent">
+      <div class="fs-label">المنفَق (المنجز)</div>
+      <div class="fs-amount">${fmt(spentWith)}<span class="fs-cur">ريال</span></div>
+      <div class="fs-pct">${spentPct}% من إجمالي المشروع</div>
+      <div class="fs-bar"><div style="width:${spentPct}%"></div></div>
+    </div>
+    <div class="fs-card remaining">
+      <div class="fs-label">المتبقي</div>
+      <div class="fs-amount">${fmt(remainingWith)}<span class="fs-cur">ريال</span></div>
+      <div class="fs-pct">${remPct}% من إجمالي المشروع</div>
+      <div class="fs-bar"><div style="width:${remPct}%"></div></div>
+    </div>
+    <div class="fs-card total">
+      <div class="fs-label">إجمالي المشروع (مع الضريبة)</div>
+      <div class="fs-amount">${fmt(totalWith)}<span class="fs-cur">ريال</span></div>
+      <div class="fs-pct">بدون ضريبة: ${fmt(totalWithout)} | ضريبة: ${fmt(totalTax)}</div>
+    </div>
+  `;
+}
+
+function renderProgress(){
+  const ids = allIds();
+  let completedCount = 0, totalQty = 0, purchasedQty = 0;
+  ids.forEach(id => {
+    const c = calcItem(id);
     totalQty += c.total_qty;
     purchasedQty += c.completed;
     if(c.done) completedCount++;
   });
-
   const pct = totalQty ? Math.round((purchasedQty / totalQty) * 100) : 0;
   document.getElementById("overallCount").textContent = `${completedCount} / ${ids.length} بند مكتمل`;
   document.getElementById("ringPct").textContent = pct + "%";
   const circumference = 169.6;
   document.getElementById("ringProgress").style.strokeDashoffset = String(circumference - (circumference * pct / 100));
-
-  document.getElementById("overallTotals").innerHTML = `
-    <div class="total-pill"><div class="n">${fmt(grandWithout)}</div><div class="l">بدون ضريبة</div></div>
-    <div class="total-pill"><div class="n">${fmt(grandTax)}</div><div class="l">الضريبة 15%</div></div>
-    <div class="total-pill grand"><div class="n">${fmt(grandWith)}</div><div class="l">الإجمالي مع الضريبة</div></div>
-  `;
 }
 
 function itemPassesFilter(id){
@@ -560,15 +621,18 @@ function renderPhases(){
       .sort((a,b) => getItemMeta(a).sort_order - getItemMeta(b).sort_order);
 
     let phaseWithout = 0, phaseTax = 0, phaseWith = 0, phaseDone = 0, phaseTotalQty = 0, phasePurchased = 0;
+    let phaseSpentWith = 0;
     phaseIds.forEach(id => {
       const c = calcItem(id);
       phaseWithout += c.line_without_tax;
       phaseTax += c.line_tax;
       phaseWith += c.line_with_tax;
+      phaseSpentWith += c.spent_with_tax;
       phaseTotalQty += c.total_qty;
       phasePurchased += c.completed;
       if(c.done) phaseDone++;
     });
+    const phaseRemaining = phaseWith - phaseSpentWith;
     const phPct = phaseTotalQty ? Math.round((phasePurchased / phaseTotalQty) * 100) : 0;
     const visibleIds = phaseIds.filter(itemPassesFilter);
 
@@ -610,10 +674,11 @@ function renderPhases(){
     const totals = document.createElement("div");
     totals.className = "phase-totals";
     totals.innerHTML = `
-      <span>إجمالي المرحلة:</span>
-      <span>بدون ضريبة: <b class="num">${fmt(phaseWithout)}</b> ريال</span>
-      <span>الضريبة: <b class="num">${fmt(phaseTax)}</b> ريال</span>
-      <span>مع الضريبة: <b class="num">${fmt(phaseWith)}</b> ريال</span>
+      <span>إجمالي المرحلة: <b class="num">${fmt(phaseWith)}</b> ريال</span>
+      <span>بدون ضريبة: <b class="num">${fmt(phaseWithout)}</b></span>
+      <span>الضريبة: <b class="num">${fmt(phaseTax)}</b></span>
+      <span class="spent-tag">المنفَق: <b class="num">${fmt(phaseSpentWith)}</b> ريال</span>
+      <span class="rem-tag">المتبقي: <b class="num">${fmt(phaseRemaining)}</b> ريال</span>
     `;
     body.appendChild(totals);
 
@@ -637,9 +702,12 @@ function renderItemRow(id){
 
   const right = document.createElement("div");
   right.className = "item-right";
+  const spentHtml = c.completed > 0 ? 
+    `<div class="item-spent-info">منفَق: ${fmt(c.spent_with_tax)} ريال</div>` : '';
   right.innerHTML = `
     <div class="item-total">${fmt(c.line_with_tax)} ريال</div>
-    <div class="item-total-tax">${c.isExempt ? 'معفى من الضريبة' : 'السعر: ' + fmt(c.line_without_tax) + ' + ضريبة: ' + fmt(c.line_tax)}</div>
+    <div class="item-total-tax">${c.isExempt ? 'معفى من الضريبة' : 'سعر: ' + fmt(c.line_without_tax) + ' + ضريبة: ' + fmt(c.line_tax)}</div>
+    ${spentHtml}
     <div class="item-actions"></div>
   `;
   const actionsEl = right.querySelector(".item-actions");
@@ -749,11 +817,9 @@ function renderItemRow(id){
   controls.appendChild(priceLabel);
 
   const taxBtn = document.createElement("button");
-  // c.isExempt=true → معفى (بدون ضريبة), c.isExempt=false → عليه ضريبة
   taxBtn.className = "tax-toggle " + (c.isExempt ? "tax-no" : "tax-yes");
   taxBtn.textContent = c.isExempt ? "✗ بدون ضريبة (معفى)" : "✓ عليه ضريبة 15%";
   taxBtn.addEventListener("click", () => {
-    // نعكس القيمة
     setItemMeta(id, {tax_included: !c.isExempt});
     render();
   });
@@ -769,7 +835,7 @@ function renderItemRow(id){
 
 // ============ إضافة بنود جديدة ============
 let pendingPhase = null;
-let pendingTaxExempt = false; // افتراضياً: عليه ضريبة (غير معفى)
+let pendingTaxExempt = false;
 
 const addModal = document.getElementById("addModal");
 const modalPhaseName = document.getElementById("modalPhaseName");
@@ -799,8 +865,6 @@ function closeAddModal(){
 
 taxOpts.forEach(opt => {
   opt.addEventListener("click", () => {
-    // data-tax="yes" → عليه ضريبة → tax_included=false
-    // data-tax="no"  → معفى → tax_included=true
     pendingTaxExempt = opt.dataset.tax === "no";
     taxOpts.forEach(o => o.classList.toggle("active", o === opt));
   });
@@ -826,7 +890,7 @@ document.getElementById("saveAdd").addEventListener("click", async () => {
     unit: "وحدة",
     total_qty: qty,
     unit_price: price,
-    tax_included: pendingTaxExempt, // ← tax_included=true يعني معفى
+    tax_included: pendingTaxExempt,
     phase: pendingPhase,
     sort_order: maxSort + 1
   };
