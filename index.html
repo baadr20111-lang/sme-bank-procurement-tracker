@@ -2,129 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>متابعة مشتريات المشروع</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.0/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --navy:#16233F;
-    --navy-light:#243B6B;
-    --orange:#FF7704;
-    --orange-soft:#FFE7D1;
-    --teal:#2BB5A0;
-    --bg:#FAF8F5;
-    --card:#FFFFFF;
-    --line:#E7E2D9;
-    --text:#20242E;
-    --text-dim:#767A85;
+    --navy:#16233F; --navy-light:#243B6B; --orange:#FF7704; --orange-soft:#FFE7D1;
+    --teal:#2BB5A0; --bg:#FAF8F5; --card:#FFFFFF; --line:#E7E2D9;
+    --text:#20242E; --text-dim:#767A85;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
+  body{background:var(--bg);color:var(--text);
     font-family:"Segoe UI","Tahoma","Geeza Pro",system-ui,sans-serif;
-    line-height:1.5;
-    padding:0 0 60px;
-  }
+    line-height:1.5;padding:0 0 60px;}
   .wrap{max-width:920px;margin:0 auto;padding:0 20px;}
-
-  header.top{
-    background:var(--navy);
-    color:#fff;
-    padding:28px 0 24px;
-    margin-bottom:22px;
-  }
+  header.top{background:var(--navy);color:#fff;padding:28px 0 24px;margin-bottom:22px;}
   header.top .wrap{display:flex;flex-direction:column;gap:16px;}
   .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .brand h1{font-size:22px;margin:0;font-weight:700;}
   .brand p{margin:2px 0 0;color:#B9C2D6;font-size:13px;}
   .team-select{display:flex;gap:8px;align-items:center;font-size:13px;color:#CDD5E6;flex-wrap:wrap;}
-  .team-select select{
-    background:#22315A;color:#fff;border:1px solid #3A4A78;border-radius:8px;
-    padding:6px 10px;font-size:13px;font-family:inherit;
-  }
-  .sync-indicator{
-    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#4CAF50;
-  }
-  .sync-indicator.syncing{color:#FFA500;}
-  .sync-indicator.error{color:#F44336;}
-  .sync-dot{
-    width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1s infinite;
-  }
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-
-  .qr-modal{
-    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;
-    align-items:center;justify-content:center;
-  }
-  .qr-modal.show{display:flex;}
-  .qr-content{
-    background:#fff;border-radius:16px;padding:24px;text-align:center;max-width:400px;
-  }
-  .qr-content h2{margin:0 0 16px;font-size:18px;}
-  #qr-code{
-    margin:16px auto;
-    background:#fff;padding:12px;border-radius:8px;
-  }
-  .qr-id{
-    background:#f0f0f0;padding:12px;border-radius:8px;margin:12px 0;word-break:break-all;
-    font-family:monospace;font-size:12px;
-  }
-  .qr-close{
-    background:var(--navy);color:#fff;border:none;padding:10px 20px;
-    border-radius:8px;cursor:pointer;font-size:14px;margin-top:12px;
-  }
-  .qr-close:hover{background:var(--navy-light);}
-
-  .overall{
-    display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;padding:16px 18px;
-    flex-wrap:wrap;
-  }
+  .team-select select{background:#22315A;color:#fff;border:1px solid #3A4A78;border-radius:8px;
+    padding:6px 10px;font-size:13px;font-family:inherit;}
+  #saveStatus{font-size:12px;min-width:120px;text-align:center;padding:5px 10px;border-radius:6px;
+    background:#1a2846;transition:all .2s;}
+  .overall{display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;
+    padding:16px 18px;flex-wrap:wrap;}
   .ring{position:relative;width:64px;height:64px;flex:none;}
   .ring svg{transform:rotate(-90deg);}
-  .ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+  .ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;}
   .overall-text{flex:1;min-width:180px;}
   .overall-text .big{font-size:19px;font-weight:700;}
   .overall-text .small{font-size:12.5px;color:#AEB8CE;margin-top:2px;}
-  .stat-pill{
-    background:#243A66;border-radius:10px;padding:8px 14px;text-align:center;min-width:84px;
-  }
+  .stat-pill{background:#243A66;border-radius:10px;padding:8px 14px;text-align:center;min-width:84px;}
   .stat-pill .n{font-size:17px;font-weight:700;color:#fff;}
   .stat-pill .l{font-size:11px;color:#AEB8CE;margin-top:2px;}
-
-  .controls{
-    display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;
-  }
-  .btn{
-    border:1px solid var(--line);background:var(--card);color:var(--text);
-    padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;
-    transition:all .15s;
-  }
-  .btn:hover{border-color:var(--orange);color:var(--orange);}
-  .btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
-
   .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
-  .filter-btn{
-    border:1px solid var(--line);background:var(--card);color:var(--text-dim);
+  .filter-btn{border:1px solid var(--line);background:var(--card);color:var(--text-dim);
     padding:7px 16px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;
-    transition:all .15s;
-  }
+    transition:all .15s;}
   .filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
   .filter-btn:not(.active):hover{border-color:var(--orange);color:var(--orange);}
-
-  .phase{
-    background:var(--card);border:1px solid var(--line);border-radius:16px;
-    margin-bottom:16px;overflow:hidden;
-  }
-  .phase-head{
-    display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;
-  }
-  .phase-num{
-    flex:none;width:34px;height:34px;border-radius:10px;background:var(--orange-soft);color:var(--orange);
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
-  }
+  .phase{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    margin-bottom:16px;overflow:hidden;}
+  .phase-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;}
+  .phase-num{flex:none;width:34px;height:34px;border-radius:10px;background:var(--orange-soft);
+    color:var(--orange);display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px;}
   .phase-title{flex:1;min-width:0;}
   .phase-title h2{margin:0;font-size:15.5px;}
   .phase-title .sub{font-size:12px;color:var(--text-dim);margin-top:1px;}
@@ -134,57 +60,49 @@
   .phase-progress-wrap .count{font-size:11px;color:var(--text-dim);}
   .chev{flex:none;color:var(--text-dim);transition:transform .2s;font-size:13px;}
   .phase.open .chev{transform:rotate(180deg);}
-
   .phase-body{border-top:1px solid var(--line);}
   .phase-body.collapsed{display:none;}
-
-  .item{
-    display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;
-  }
+  .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;}
   .item:last-child{border-bottom:none;}
   .item.done{background:#FAFCFA;}
   .item.done .item-name{text-decoration:line-through;color:var(--text-dim);}
-
-  .chk{
-    flex:none;width:22px;height:22px;border-radius:6px;border:2px solid #CBD0D8;
+  .item.partial{background:#fffdf8;}
+  .chk{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid #CBD0D8;
     margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    background:#fff;transition:all .15s;
-  }
+    background:#fff;transition:all .15s;}
   .chk.checked{background:var(--teal);border-color:var(--teal);}
   .chk svg{width:13px;height:13px;display:none;}
   .chk.checked svg{display:block;}
-
   .item-main{flex:1;min-width:0;cursor:pointer;}
   .item-name{font-size:14px;font-weight:600;}
   .item-meta{font-size:12px;color:var(--text-dim);margin-top:2px;}
-  .item-desc{
-    font-size:12.5px;color:var(--text-dim);margin-top:6px;line-height:1.6;
-    max-height:0;overflow:hidden;transition:max-height .25s ease;white-space:pre-line;
-  }
+  .item-desc{font-size:12.5px;color:var(--text-dim);margin-top:6px;line-height:1.6;
+    max-height:0;overflow:hidden;transition:max-height .25s ease;white-space:pre-line;}
   .item-desc.expanded{max-height:400px;}
-
   .assignee{flex:none;}
-  .assignee select{
-    font-family:inherit;font-size:12.5px;border-radius:8px;padding:6px 10px;border:1px solid var(--line);
-    background:#F6F3EE;color:var(--text);cursor:pointer;
-  }
+  .assignee select{font-family:inherit;font-size:12.5px;border-radius:8px;padding:6px 10px;
+    border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
   .assignee select.set-بدر{background:#E7F0FF;border-color:#B7CFFA;}
   .assignee select.set-ريان{background:#FDEBD8;border-color:#F6CBA0;}
   .assignee select.set-سليمان{background:#E4F7EE;border-color:#A9E3C4;}
-
   .price{flex:none;font-size:12.5px;color:var(--text-dim);min-width:78px;text-align:left;padding-top:2px;}
   .price b{color:var(--text);font-weight:700;}
-
   .empty-msg{padding:24px;text-align:center;color:var(--text-dim);font-size:13px;}
-
-  footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);font-size:11.5px;text-align:center;}
-
+  footer{max-width:920px;margin:30px auto 0;padding:0 20px;color:var(--text-dim);
+    font-size:11.5px;text-align:center;}
   @media (max-width:640px){
     .phase-progress-wrap{width:70px;}
     .price{display:none;}
     .brand{flex-direction:column;align-items:flex-start;}
-    .team-select{width:100%;flex-wrap:wrap;}
   }
+  .status-control{flex:none;min-width:118px;}
+  .status-select{border:1px solid #d7dce5;border-radius:10px;padding:9px 28px 9px 10px;
+    font-family:inherit;font-size:13px;background:#fff;cursor:pointer;}
+  .status-select.status-done{background:#e7f6f0;border-color:#b8e3d4;color:#087d65;}
+  .status-select.status-partial{background:#fff1df;border-color:#f1c98e;color:#a76100;}
+  .status-select.status-pending{background:#f6f6f4;color:#555;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .saving-pulse{animation:pulse 1s infinite;}
 </style>
 </head>
 <body>
@@ -198,10 +116,8 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
-        <div class="sync-indicator" id="syncStatus">
-          <div class="sync-dot"></div>
-          <span id="syncText">جاهز</span>
-        </div>
+        <button id="refreshBtn" title="تحديث يدوي" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
+        <span id="saveStatus">جاري الاتصال...</span>
         أنا:
         <select id="whoAmI">
           <option value="">اختر اسمك</option>
@@ -221,7 +137,7 @@
         <div class="pct" id="ringPct">0%</div>
       </div>
       <div class="overall-text">
-        <div class="big" id="overallCount">0 / 0 بند تم شراؤه</div>
+        <div class="big" id="overallCount">0 / 0 بند مكتمل</div>
         <div class="small">عبر المراحل الثلاث كلها</div>
       </div>
       <div class="stat-pill"><div class="n" id="pillBadr">0</div><div class="l">بدر</div></div>
@@ -232,11 +148,6 @@
 </header>
 
 <div class="wrap">
-  <div class="controls">
-    <button class="btn primary" id="shareBtn">📱 شارك مع الفريق (QR Code)</button>
-    <button class="btn" id="syncBtn">🔄 مزامنة يدوية</button>
-  </div>
-
   <div class="filters" id="filters">
     <button class="filter-btn active" data-f="الكل">الكل</button>
     <button class="filter-btn" data-f="بدر">بدر</button>
@@ -245,203 +156,246 @@
     <button class="filter-btn" data-f="غير محدد">غير محدد</button>
     <button class="filter-btn" data-f="متبقي" style="margin-right:auto;">المتبقي فقط</button>
   </div>
-
   <div id="phases"></div>
 </div>
 
-<div id="qrModal" class="qr-modal">
-  <div class="qr-content">
-    <h2>شارك مع الفريق</h2>
-    <p style="margin:0;font-size:12px;color:#666;">اسكن الـ QR Code بالجوال الثاني</p>
-    <div id="qr-code"></div>
-    <div class="qr-id" id="qr-id"></div>
-    <button class="qr-close" onclick="document.getElementById('qrModal').classList.remove('show')">اغلق</button>
-  </div>
-</div>
-
-<footer>متصل مع الفريق مباشرة - بدون إنترنت! ⚡</footer>
+<footer>تحديث لحظي عبر Supabase Realtime — أي تعديل يظهر فوراً لجميع الأطراف.</footer>
 </div>
 
 <script>
 const PHASES = [
-  {
-    id: "p1",
-    title: "المرحلة الأولى",
-    sub: "تجهيزات المبنى بالهوية البصرية",
-    items: [
-      {n:"لوحة اكريليك", d:"لوحة اكريليك ابيض مع سلسلة وحلقات مقاس 60×30 سم سماكة 6 مم طباعة يوفي وجهان كامل مع التركيب بالكراج", u:"وحدة", q:80, price:165, total:13200},
-      {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + نساء مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
-      {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + رجال مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
-      {n:"لوحة زنكور مضيء", d:"لوحات إرشادية جانبية مضيئة لدورات المياه - ركن القهوة - المستودع - غرفة الاتصالات - مصلى النساء", u:"وحدة", q:20, price:1500, total:30000},
-      {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة مقاس 50×50 وجهان حمامات", u:"وحدة", q:5, price:900, total:4500},
-      {n:"لوحة اكريليك", d:"لوحة مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:2800, total:2800},
-      {n:"حروف", d:"حروف مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:1000, total:1000},
-      {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 170×340 سم الدور (3 و4)", u:"وحدة", q:4, price:3400, total:13600},
-      {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 110×210 سم الدور (4 و5)", u:"وحدة", q:2, price:1500, total:3000},
-      {n:"الاوتوكاد", d:"أعمال الاوتوكاد", u:"وحدة", q:1, price:4000, total:4000},
-      {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات الطابق الأرضي", u:"وحدة", q:12, price:800, total:9600},
-      {n:"لوحات رسم للأدوار", d:"من الدور 3 إلى 5", u:"وحدة", q:12, price:3500, total:42000},
-    ]
-  },
-  {
-    id: "p2",
-    title: "المرحلة الثانية",
-    sub: "تجهيزات مكتب الرئيس وغرفة الاجتماعات",
-    items: [
-      {n:"قاعدة رخامية", d:"قاعدة رخامية بهوية البنك", u:"وحدة", q:1, price:2000, total:2000},
-      {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:5, price:689, total:3445},
-      {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:2, price:680, total:1360},
-      {n:"لوحة فنية كبيرة", d:"لوحة فنية كبيرة — مكتب إبراهيم الراشد", u:"وحدة", q:1, price:7500, total:7500},
-      {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:6000, total:12000},
-      {n:"لوحتين فنية صغيرة", d:"لوحتين فنية صغيرة — مكتب أ. إبراهيم الراشد", u:"وحدة", q:2, price:2500, total:5000},
-      {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:4000, total:8000},
-      {n:"اتعاب نهى", d:"اتعاب الفنانة نهى الجريد", u:"وحدة", q:1, price:10000, total:10000},
-    ]
-  },
-  {
-    id: "p3",
-    title: "المرحلة الثالثة",
-    sub: "اللوحات الخارجية للمبنى",
-    items: [
-      {n:"لوحة واجهة المبنى", d:"عرض 4.2 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:6032.88},
-      {n:"لوحة البوابة", d:"عرض 4 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:2352},
-      {n:"لوحة المواقف", d:"عرض 2.8 م وارتفاع 2.6 م", u:"وحدة", q:1, price:320, total:2329.6},
-      {n:"لوحة الاستقبال", d:"عرض 2.5 م وارتفاع 1.5 م", u:"وحدة", q:1, price:320, total:1200},
-    ]
-  },
+  { id:"p1", title:"المرحلة الأولى", sub:"تجهيزات المبنى بالهوية البصرية", items:[
+    {n:"لوحة اكريليك", d:"لوحة اكريليك ابيض مع سلسلة وحلقات مقاس 60×30 سم سماكة 6 مم طباعة يوفي وجهان كامل مع التركيب بالكراج", u:"وحدة", q:80, price:165, total:13200},
+    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + نساء مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
+    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة رجال + رجال مقاس 120 سم", u:"وحدة", q:5, price:2200, total:11000},
+    {n:"لوحة زنكور مضيء", d:"لوحات إرشادية جانبية مضيئة لدورات المياه - ركن القهوة - المستودع - غرفة الاتصالات - مصلى النساء", u:"وحدة", q:20, price:1500, total:30000},
+    {n:"لوحة زنكور مضيء", d:"عمل لوحة زنكور مضيئة مقاس 50×50 وجهان حمامات", u:"وحدة", q:5, price:900, total:4500},
+    {n:"لوحة اكريليك", d:"لوحة مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:2800, total:2800},
+    {n:"حروف", d:"حروف مضيئة اكريليك ابيض مقاس 70×160 سم بجانب الأسنسير", u:"وحدة", q:1, price:1000, total:1000},
+    {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 170×340 سم الدور (3 و4)", u:"وحدة", q:4, price:3400, total:13600},
+    {n:"لوحة اكريليك", d:"لوحة خشب مع اكريليك 2 لون مقاس 110×210 سم الدور (4 و5)", u:"وحدة", q:2, price:1500, total:3000},
+    {n:"الاوتوكاد", d:"أعمال الاوتوكاد", u:"وحدة", q:1, price:4000, total:4000},
+    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات الطابق الأرضي", u:"وحدة", q:12, price:800, total:9600},
+    {n:"لوحات رسم للأدوار", d:"من الدور 3 إلى 5", u:"وحدة", q:12, price:3500, total:42000},
+  ]},
+  { id:"p2", title:"المرحلة الثانية", sub:"تجهيزات مكتب الرئيس وغرفة الاجتماعات", items:[
+    {n:"قاعدة رخامية", d:"قاعدة رخامية بهوية البنك", u:"وحدة", q:1, price:2000, total:2000},
+    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:5, price:689, total:3445},
+    {n:"شد وإطارات فنية لجميع اللوحات", d:"شد وإطارات فنية لجميع اللوحات", u:"وحدة", q:2, price:680, total:1360},
+    {n:"لوحة فنية كبيرة", d:"لوحة فنية كبيرة — مكتب إبراهيم الراشد", u:"وحدة", q:1, price:7500, total:7500},
+    {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:6000, total:12000},
+    {n:"لوحتين فنية صغيرة", d:"لوحتين فنية صغيرة — مكتب أ. إبراهيم الراشد", u:"وحدة", q:2, price:2500, total:5000},
+    {n:"لوحتين فنية", d:"لوحتين فنية — غرفة الاجتماع", u:"وحدة", q:2, price:4000, total:8000},
+    {n:"اتعاب نهى", d:"اتعاب الفنانة نهى الجريد", u:"وحدة", q:1, price:10000, total:10000},
+    {n:"نباتات طبيعية", d:"6 نباتات طبيعية (بدون أحواض) — الأحواض تُسعّر بشكل منفصل", u:"وحدة", q:6, price:158.33, total:950},
+    {n:"أحواض نباتات", d:"أحواض نباتات لمكتب الرئيس والمختصر (653 + 400 قيمة الأحواض)", u:"وحدة", q:6, price:175.5, total:1053},
+    {n:"طاولة كونسول وديكورات كلاسيكية", d:"طاولة كونسول لاستقبال مكتب الرئيس مع قطع تحف/ديكور كلاسيكية مرافقة (مرايا خشب انتيك، كوستار، تمريات زجاج، أبواب خشب مزخرفة، علبة فخار، مدخل خشب بنقش وردة، طقم صحن المنيوم، رسوم توصيل)", u:"وحدة", q:1, price:2476.09, total:2476.09},
+    {n:"فرشة صغيرة", d:"فرشة صغيرة لمكتب الرئيس / المختصر", u:"وحدة", q:1, price:565.23, total:565.23},
+    {n:"فرشة كبيرة", d:"فرشة كبيرة لمكتب الرئيس", u:"وحدة", q:1, price:1043.47, total:1043.47},
+    {n:"تجهيزات دورة مياه الرئيس ونائب الرئيس", d:"طقم: معطرات + فوط + حاويات (نسختان: للرئيس ولنائب الرئيس) والخداديات", u:"طقم", q:2, price:1374.79, total:2749.58},
+    {n:"معلاق بشت", d:"معلاق بشت لمكتب الرئيس", u:"وحدة", q:1, price:17.39, total:17.39},
+    {n:"معطرات", d:"معطرات إضافية", u:"وحدة", q:1, price:3417.39, total:3417.39},
+    {n:"سلال مهملات جلدية رسمية", d:"استبدال جميع سلال المهملات في مكتب الرئيس وغرفة الاجتماعات بسلال رسمية من الجلد", u:"وحدة", q:5, price:140, total:700},
+    {n:"سماعات صوتية", d:"سماعات صوتية للمختصر", u:"وحدة", q:1, price:520.87, total:520.87},
+    {n:"تجهيزات ركن رياضي", d:"أوزان مودرن ستايل + إضاءة + مناشف رياضية بسيطة للمختصر", u:"طقم", q:1, price:475, total:475},
+    {n:"رسوم عمالة", d:"نجارة + نقل وتعديل الدولاب + نقل جهاز المشين وإزالة الكتب والشاشة", u:"عمل", q:2, price:600, total:1200},
+    {n:"نباتات صغيرة بأصص", d:"6 نباتات صغيرة بأصص (بوتس)", u:"وحدة", q:6, price:18, total:108},
+    {n:"صندوق سجاد صغيرة", d:"صندوق/قطعة سجاد صغيرة", u:"وحدة", q:1, price:1000, total:1000},
+    {n:"فواحة بوباب", d:"فواحة عطرية (بوباب)", u:"وحدة", q:2, price:850, total:1700},
+    {n:"ليد إضاءة", d:"إضاءة LED", u:"طقم", q:1, price:309, total:309},
+    {n:"طوفريتين", d:"طوفريتين (قطعتان)", u:"وحدة", q:2, price:150, total:300},
+    {n:"مات ووطاية لدورة المياه", d:"مات ووطاية لدورة المياه", u:"طقم", q:2, price:500, total:1000},
+    {n:"كرسي استرخاء", d:"كرسي استرخاء", u:"كرسي", q:1, price:10000, total:10000},
+    {n:"أعلام السعودية", d:"أعلام المملكة العربية السعودية", u:"علم", q:4, price:650, total:2600},
+    {n:"أعلام بنك المنشآت", d:"أعلام بهوية بنك المنشآت", u:"علم", q:4, price:700, total:2800},
+  ]},
+  { id:"p3", title:"المرحلة الثالثة", sub:"اللوحات الخارجية للمبنى", items:[
+    {n:"لوحة واجهة المبنى", d:"عرض 4.2 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:6032.88},
+    {n:"لوحة البوابة", d:"عرض 4 م وارتفاع 1.4 م", u:"وحدة", q:1, price:420, total:2352},
+    {n:"لوحة المواقف", d:"عرض 2.8 م وارتفاع 2.6 م", u:"وحدة", q:1, price:320, total:2329.6},
+    {n:"لوحة الاستقبال", d:"عرض 2.5 م وارتفاع 1.5 م", u:"وحدة", q:1, price:320, total:1200},
+    {n:"إيجار لوحة واجهة المبنى", d:"إيجار سنوي — لوحة واجهة المبنى", u:"وحدة", q:1, price:10000, total:58800},
+    {n:"إيجار لوحة البوابة", d:"إيجار سنوي — لوحة البوابة", u:"وحدة", q:1, price:10000, total:56000},
+    {n:"إيجار لوحة المواقف", d:"إيجار سنوي — لوحة المواقف", u:"وحدة", q:1, price:7000, total:50960},
+    {n:"إيجار لوحة الاستقبال", d:"إيجار سنوي — لوحة الاستقبال", u:"وحدة", q:1, price:7000, total:26250},
+  ]},
 ];
 
 PHASES.forEach(ph => ph.items.forEach((it,i) => it.id = ph.id + "-" + i));
 
-let peer = null;
-let myId = null;
-let connections = new Map();
+const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
+
 let state = { items: {} };
 let currentFilter = "الكل";
+let saveTimer = null;
+let saveInFlight = false;
+let dirtyLocal = false;
+let supabaseClient = null;
+let realtimeConnected = false;
 
-function fmt(n){
-  return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n);
+function fmt(n){ return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n); }
+function allItems(){ return PHASES.flatMap(ph => ph.items); }
+
+function setStatus(text, color, pulse){
+  const el = document.getElementById("saveStatus");
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = color || "#CDD5E6";
+  el.classList.toggle("saving-pulse", !!pulse);
 }
 
-function setSyncStatus(msg){
-  document.getElementById("syncText").textContent = msg;
-  const indicator = document.getElementById("syncStatus");
-  if(msg.includes("✓")) indicator.style.color = "#4CAF50";
-  else if(msg.includes("⚠")) indicator.style.color = "#FFA500";
-  else indicator.style.color = "#4CAF50";
+function sbHeaders(extra = {}){
+  return Object.assign({
+    "apikey": SUPABASE_KEY,
+    "Content-Type": "application/json"
+  }, extra);
 }
 
-function initPeer(){
-  const peerScript = document.createElement("script");
-  
-  peer = new Peer({
-    config: {
-      iceServers: [
-        { urls: ["stun:stun.l.google.com:19302"] }
-      ]
-    }
-  });
-
-  peer.on("open", (id) => {
-    myId = id;
-    setSyncStatus("متصل ✓");
-    console.log("My ID:", id);
-    showQRCode(id);
-  });
-
-  peer.on("connection", (conn) => {
-    console.log("Connection from:", conn.peer);
-    setupConnection(conn);
-  });
-
-  peer.on("error", (err) => {
-    console.error("Peer error:", err);
-    setSyncStatus("خطأ اتصال ⚠");
-  });
+async function sbFetch(path, options = {}){
+  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, Object.assign({
+    headers: sbHeaders()
+  }, options));
+  if(!res.ok){
+    const text = await res.text();
+    throw new Error("Supabase " + res.status + ": " + text);
+  }
+  if(res.status === 204) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
-function setupConnection(conn){
-  connections.set(conn.peer, conn);
-  
-  conn.on("data", (data) => {
-    if(data.type === "sync"){
-      state.items = data.items;
-      render();
-    }
+async function apiGet(){
+  const data = await sbFetch("procurement_items?select=id%2Cdone%2Cassignee%2Ccompleted_qty");
+  const items = {};
+  (data || []).forEach(row => {
+    items[row.id] = {
+      done: !!row.done,
+      assignee: row.assignee || "",
+      completedQty: Number.isFinite(Number(row.completed_qty)) ? Number(row.completed_qty) : 0
+    };
   });
-
-  conn.on("close", () => {
-    connections.delete(conn.peer);
-  });
-
-  conn.on("error", (err) => {
-    console.error("Connection error:", err);
-  });
+  return { items };
 }
 
-function connectToPeer(peerId){
-  if(!peer) return;
-  const conn = peer.connect(peerId);
-  setupConnection(conn);
+async function apiPut(data){
+  const rows = Object.entries(data.items || {}).map(([id, s]) => ({
+    id,
+    done: !!s.done,
+    assignee: s.assignee || "",
+    completed_qty: Math.max(0, Number(s.completedQty || 0)),
+    updated_at: new Date().toISOString()
+  }));
+  if(!rows.length) return;
+  saveInFlight = true;
+  try{
+    await sbFetch("procurement_items?on_conflict=id", {
+      method: "POST",
+      headers: sbHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
+      body: JSON.stringify(rows)
+    });
+    dirtyLocal = false;
+  } finally {
+    saveInFlight = false;
+  }
 }
 
-function broadcast(){
-  connections.forEach(conn => {
+function applyRemoteRow(row){
+  if(!row || !row.id) return;
+  state.items[row.id] = {
+    done: !!row.done,
+    assignee: row.assignee || "",
+    completedQty: Number(row.completed_qty) || 0
+  };
+}
+
+function subscribeRealtime(){
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  supabaseClient
+    .channel('procurement-changes')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'procurement_items' },
+      (payload) => {
+        if(saveInFlight || dirtyLocal) return;
+        applyRemoteRow(payload.new);
+        render();
+        setStatus("تحديث لحظي ✓", "#8DE0C8");
+      }
+    )
+    .subscribe((status) => {
+      if(status === 'SUBSCRIBED'){
+        realtimeConnected = true;
+        setStatus("متصل لحظياً ✓", "#8DE0C8");
+      } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+        realtimeConnected = false;
+        setStatus("وضع احتياطي ⟳", "#FFD39B");
+      } else if(status === 'CLOSED'){
+        realtimeConnected = false;
+        setStatus("غير متصل", "#FFB4A2");
+      }
+    });
+
+  setInterval(async () => {
+    if(realtimeConnected) return;
+    if(dirtyLocal || saveInFlight) return;
     try{
-      conn.send({ type: "sync", items: state.items });
-    }catch(e){
-      console.error("Broadcast error:", e);
+      const remote = await apiGet();
+      if(remote && remote.items){
+        state = remote;
+        render();
+      }
+    }catch(e){ console.warn("fallback sync failed", e); }
+  }, 30000);
+}
+
+async function loadState(){
+  if(dirtyLocal || saveInFlight) return;
+  try{
+    setStatus("جاري التحديث...", "#CDD5E6", true);
+    const remote = await apiGet();
+    if(remote && remote.items){
+      state = remote;
     }
-  });
+    if(!realtimeConnected) setStatus("متصل ✓", "#8DE0C8");
+  }catch(e){
+    console.log("remote load failed", e);
+    setStatus("غير متصل", "#FFB4A2");
+  }
+  render();
 }
 
-function showQRCode(id){
-  const qrContainer = document.getElementById("qr-code");
-  qrContainer.innerHTML = "";
-  
-  const url = `${window.location.origin}${window.location.pathname}?peer=${id}`;
-  
-  QRCode.toCanvas(qrContainer, url, {
-    width: 250,
-    margin: 0,
-    color: { dark: "#16233F", light: "#fff" }
-  }, (err) => {
-    if(err) console.error("QR error:", err);
-  });
-
-  document.getElementById("qr-id").textContent = "ID: " + id;
-}
-
-document.getElementById("shareBtn").addEventListener("click", () => {
-  document.getElementById("qrModal").classList.add("show");
-});
-
-document.getElementById("syncBtn").addEventListener("click", () => {
-  broadcast();
-  setSyncStatus("مزامنة جاري... ✓");
-  setTimeout(() => setSyncStatus("متصل ✓"), 1500);
-});
-
-const params = new URLSearchParams(window.location.search);
-const peerParam = params.get("peer");
-
-initPeer();
-
-if(peerParam){
-  setTimeout(() => connectToPeer(peerParam), 1000);
+function queueSave(){
+  dirtyLocal = true;
+  setStatus("جاري الحفظ...", "#FFD39B", true);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      await apiPut(state);
+      setStatus(realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓", "#8DE0C8");
+    }catch(e){
+      console.error("save failed", e);
+      setStatus("فشل الحفظ — إعادة محاولة", "#FFB4A2");
+      dirtyLocal = true;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async ()=>{
+        if(dirtyLocal && !saveInFlight){
+          try{ await apiPut(state); setStatus("محفوظ ✓", "#8DE0C8"); }
+          catch(err){ console.error("retry failed", err); setStatus("فشل الحفظ", "#FFB4A2"); }
+        }
+      }, 2500);
+    }
+  }, 200);
 }
 
 function getItemState(id){
-  return state.items[id] || { done:false, assignee:"" };
+  if(state.items[id]) return Object.assign({done:false, assignee:"", completedQty:0}, state.items[id]);
+  return { done:false, assignee:"", completedQty:0 };
 }
 
 function setItemState(id, patch){
   state.items[id] = Object.assign({}, getItemState(id), patch);
-  broadcast();
-}
-
-function allItems(){
-  return PHASES.flatMap(ph => ph.items);
+  queueSave();
 }
 
 function render(){
@@ -452,10 +406,12 @@ function render(){
 function renderOverall(){
   const items = allItems();
   const total = items.length;
-  const done = items.filter(it => getItemState(it.id).done).length;
-  const pct = total ? Math.round((done/total)*100) : 0;
+  const completed = items.filter(it => getItemState(it.id).completedQty >= it.q).length;
+  const purchasedQty = items.reduce((sum,it)=>sum + Math.min(it.q, Math.max(0, Number(getItemState(it.id).completedQty || 0))), 0);
+  const totalQty = items.reduce((sum,it)=>sum + it.q, 0);
+  const pct = totalQty ? Math.round((purchasedQty/totalQty)*100) : 0;
 
-  document.getElementById("overallCount").textContent = `${done} / ${total} بند تم شراؤه`;
+  document.getElementById("overallCount").textContent = `${completed} / ${total} بند مكتمل`;
   document.getElementById("ringPct").textContent = pct + "%";
   const circumference = 169.6;
   document.getElementById("ringProgress").style.strokeDashoffset = String(circumference - (circumference*pct/100));
@@ -463,7 +419,7 @@ function renderOverall(){
   const counts = {"بدر":0,"ريان":0,"سليمان":0};
   items.forEach(it=>{
     const s = getItemState(it.id);
-    if(s.done && counts.hasOwnProperty(s.assignee)) counts[s.assignee]++;
+    if(s.completedQty >= it.q && counts.hasOwnProperty(s.assignee)) counts[s.assignee]++;
   });
   document.getElementById("pillBadr").textContent = counts["بدر"];
   document.getElementById("pillRayan").textContent = counts["ريان"];
@@ -473,7 +429,7 @@ function renderOverall(){
 function itemPassesFilter(it){
   const s = getItemState(it.id);
   if(currentFilter === "الكل") return true;
-  if(currentFilter === "متبقي") return !s.done;
+  if(currentFilter === "متبقي") return s.completedQty < it.q;
   if(currentFilter === "غير محدد") return !s.assignee;
   return s.assignee === currentFilter;
 }
@@ -483,9 +439,11 @@ function renderPhases(){
   container.innerHTML = "";
 
   PHASES.forEach((ph, idx) => {
-    const phDone = ph.items.filter(it=>getItemState(it.id).done).length;
+    const phDone = ph.items.filter(it=>getItemState(it.id).completedQty >= it.q).length;
     const phTotal = ph.items.length;
-    const phPct = phTotal ? Math.round((phDone/phTotal)*100) : 0;
+    const phPurchased = ph.items.reduce((sum,it)=>sum + Math.min(it.q, Math.max(0, Number(getItemState(it.id).completedQty || 0))), 0);
+    const phQty = ph.items.reduce((sum,it)=>sum + it.q, 0);
+    const phPct = phQty ? Math.round((phPurchased/phQty)*100) : 0;
     const visibleItems = ph.items.filter(itemPassesFilter);
 
     const phaseEl = document.createElement("div");
@@ -501,7 +459,7 @@ function renderPhases(){
       </div>
       <div class="phase-progress-wrap">
         <div class="phase-progress-bar"><div style="width:${phPct}%"></div></div>
-        <div class="count">${phDone}/${phTotal} تم شراؤها</div>
+        <div class="count">${phPurchased}/${phQty} كمية مشتراة · ${phDone}/${phTotal} بند مكتمل</div>
       </div>
       <div class="chev">▾</div>
     `;
@@ -527,21 +485,41 @@ function renderPhases(){
 
 function renderItemRow(it){
   const s = getItemState(it.id);
+  const currentQty = Math.min(it.q, Math.max(0, Number(s.completedQty || 0)));
   const row = document.createElement("div");
-  row.className = "item" + (s.done ? " done" : "");
+  row.className = "item" + (currentQty >= it.q ? " done" : currentQty > 0 ? " partial" : "");
 
-  const chk = document.createElement("div");
-  chk.className = "chk" + (s.done ? " checked" : "");
-  chk.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  chk.addEventListener("click", (e)=>{
+  const statusWrap = document.createElement("div");
+  statusWrap.className = "status-control";
+  const statusSel = document.createElement("select");
+  statusSel.className = "status-select " + (currentQty >= it.q ? "status-done" : currentQty > 0 ? "status-partial" : "status-pending");
+  statusSel.innerHTML = `
+    <option value="0">غير مكتمل</option>
+    <option value="partial">مكتمل جزئي</option>
+    <option value="full">مكتمل</option>`;
+  statusSel.value = currentQty >= it.q ? "full" : currentQty > 0 ? "partial" : "0";
+  statusSel.addEventListener("click", e=>e.stopPropagation());
+  statusSel.addEventListener("change", (e)=>{
     e.stopPropagation();
-    const newDone = !s.done;
+    let qty = 0;
+    if(statusSel.value === "full") qty = it.q;
+    if(statusSel.value === "partial") {
+      const answer = window.prompt(`كم تم إنجازه من ${it.q} ${it.u}؟`, String(currentQty > 0 ? currentQty : 1));
+      if(answer === null){ render(); return; }
+      qty = Number(answer);
+      if(!Number.isFinite(qty) || qty < 1 || qty > it.q || !Number.isInteger(qty)){
+        alert(`أدخل رقمًا صحيحًا من 1 إلى ${it.q}`);
+        render();
+        return;
+      }
+    }
     let assignee = s.assignee;
     const who = document.getElementById("whoAmI").value;
-    if(newDone && !assignee && who) assignee = who;
-    setItemState(it.id, {done:newDone, assignee});
+    if(qty > 0 && !assignee && who) assignee = who;
+    setItemState(it.id, {done: qty >= it.q, completedQty: qty, assignee});
     render();
   });
+  statusWrap.appendChild(statusSel);
 
   const main = document.createElement("div");
   main.className = "item-main";
@@ -576,7 +554,7 @@ function renderItemRow(it){
   });
   assignWrap.appendChild(sel);
 
-  row.appendChild(chk);
+  row.appendChild(statusWrap);
   row.appendChild(main);
   row.appendChild(price);
   row.appendChild(assignWrap);
@@ -595,10 +573,20 @@ document.getElementById("whoAmI").addEventListener("change", (e)=>{
   localStorage.setItem("sme-tracker-who", e.target.value);
 });
 
-const who = localStorage.getItem("sme-tracker-who");
-if(who) document.getElementById("whoAmI").value = who;
+document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
 
-render();
+(async function(){
+  const who = localStorage.getItem("sme-tracker-who");
+  if(who) document.getElementById("whoAmI").value = who;
+  render();
+  try{
+    await loadState();
+    subscribeRealtime();
+  }catch(e){
+    console.error(e);
+    setStatus("خطأ في الاتصال", "#FFB4A2");
+  }
+})();
 </script>
 </body>
 </html>
