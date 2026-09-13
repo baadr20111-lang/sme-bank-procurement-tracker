@@ -32,13 +32,13 @@
   .ring{position:relative;width:64px;height:64px;flex:none;}
   .ring svg{transform:rotate(-90deg);}
   .ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:700;}
+    font-size:14px;font-weight:700;font-family:'Segoe UI',sans-serif;}
   .overall-text{flex:1;min-width:180px;}
   .overall-text .big{font-size:19px;font-weight:700;}
   .overall-text .small{font-size:12.5px;color:#AEB8CE;margin-top:2px;}
   .overall-totals{display:flex;gap:8px;flex-wrap:wrap;}
   .total-pill{background:#243A66;border-radius:10px;padding:8px 12px;text-align:center;min-width:100px;}
-  .total-pill .n{font-size:13px;font-weight:700;color:#fff;}
+  .total-pill .n{font-size:13px;font-weight:700;color:#fff;direction:ltr;}
   .total-pill .l{font-size:10.5px;color:#AEB8CE;margin-top:2px;}
   .total-pill.grand{background:#2BB5A0;color:#fff;}
   .total-pill.grand .n{color:#fff;font-size:14px;}
@@ -63,7 +63,7 @@
   .phase-progress-wrap{flex:none;width:130px;text-align:left;}
   .phase-progress-bar{height:6px;background:#EFEAE1;border-radius:99px;overflow:hidden;margin-bottom:4px;}
   .phase-progress-bar > div{height:100%;background:var(--teal);border-radius:99px;transition:width .3s;}
-  .phase-progress-wrap .count{font-size:11px;color:var(--text-dim);}
+  .phase-progress-wrap .count{font-size:11px;color:var(--text-dim);direction:ltr;text-align:left;}
   .chev{flex:none;color:var(--text-dim);transition:transform .2s;font-size:13px;}
   .phase.open .chev{transform:rotate(180deg);}
   .phase-body{border-top:1px solid var(--line);}
@@ -72,7 +72,8 @@
   .phase-totals{background:#F6F9F8;padding:12px 18px;border-top:1px solid var(--line);
     display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;}
   .phase-totals span{color:var(--text-dim);}
-  .phase-totals b{color:var(--text);font-weight:700;}
+  .phase-totals b{color:var(--text);font-weight:700;direction:ltr;}
+  .phase-totals .num{direction:ltr;display:inline-block;}
 
   .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;flex-wrap:wrap;}
   .item:last-child{border-bottom:none;}
@@ -83,11 +84,18 @@
     padding:4px 6px;border-radius:6px;font-family:inherit;color:var(--text);width:100%;}
   .item-name-input:hover{border-color:var(--line);background:#fff;}
   .item-name-input:focus{border-color:var(--orange);background:#fff;outline:none;}
-  .item-desc{font-size:12px;color:var(--text-dim);padding:2px 6px;}
+
+  .item-desc-input{font-size:12px;color:var(--text-dim);padding:6px 8px;border:1px dashed transparent;
+    background:transparent;border-radius:6px;font-family:inherit;width:100%;resize:none;
+    min-height:26px;overflow:hidden;line-height:1.5;direction:rtl;}
+  .item-desc-input:hover{border-color:var(--line);background:#fff;}
+  .item-desc-input:focus{border-color:var(--orange);background:#fff;outline:none;}
+  .item-desc-input::placeholder{color:#BBB5AC;}
+
   .item-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;}
   .item-controls label{font-size:11.5px;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;}
-  .item-controls input{width:70px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;
-    font-family:inherit;font-size:12.5px;text-align:center;background:#fff;}
+  .item-controls input{width:80px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;
+    font-family:inherit;font-size:12.5px;text-align:center;background:#fff;direction:ltr;}
   .item-controls input:focus{border-color:var(--orange);outline:none;}
   .item-controls .tax-toggle{background:#F6F3EE;border:1px solid var(--line);border-radius:6px;
     padding:5px 8px;font-size:11.5px;cursor:pointer;font-family:inherit;}
@@ -102,8 +110,8 @@
   .status-select.status-pending{background:#f6f6f4;color:#555;}
 
   .item-right{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:130px;}
-  .item-total{font-size:13px;font-weight:700;color:var(--text);}
-  .item-total-tax{font-size:11px;color:var(--text-dim);}
+  .item-total{font-size:13px;font-weight:700;color:var(--text);direction:ltr;}
+  .item-total-tax{font-size:11px;color:var(--text-dim);direction:ltr;text-align:left;}
   .item-actions{display:flex;gap:6px;align-items:center;}
   .assignee-sel{font-family:inherit;font-size:11.5px;border-radius:6px;padding:4px 6px;
     border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
@@ -124,13 +132,11 @@
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   .saving-pulse{animation:pulse 1s infinite;}
 
-  /* زر إضافة بند */
   .add-item-btn{background:transparent;border:2px dashed #C7BFB0;color:var(--text-dim);
     padding:12px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;
     width:calc(100% - 36px);margin:14px 18px;transition:all .15s;font-weight:600;}
   .add-item-btn:hover{border-color:var(--orange);color:var(--orange);background:#FFF9F3;}
 
-  /* نافذة منبثقة */
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:1000;
     align-items:center;justify-content:center;padding:20px;}
   .modal-bg.open{display:flex;}
@@ -141,6 +147,7 @@
   .modal label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:4px;margin-top:12px;}
   .modal input, .modal textarea{width:100%;padding:9px 12px;border:1px solid var(--line);
     border-radius:8px;font-family:inherit;font-size:13.5px;background:#FAFAF8;color:var(--text);}
+  .modal input[type=number]{direction:ltr;text-align:left;}
   .modal input:focus, .modal textarea:focus{border-color:var(--orange);background:#fff;outline:none;}
   .modal textarea{resize:vertical;min-height:60px;}
   .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -220,8 +227,8 @@
     <label>اسم البند *</label>
     <input type="text" id="newName" placeholder="مثال: لوحة إعلانية" autofocus>
 
-    <label>الوصف (اختياري)</label>
-    <textarea id="newDesc" placeholder="وصف مختصر..."></textarea>
+    <label>الوصف / ملاحظات (اختياري)</label>
+    <textarea id="newDesc" placeholder="ملاحظات..."></textarea>
 
     <div class="row2">
       <div>
@@ -267,7 +274,7 @@ let dirtyLocal = false;
 let supabaseClient = null;
 let realtimeConnected = false;
 
-function fmt(n){ return new Intl.NumberFormat('ar', {maximumFractionDigits:2}).format(n); }
+function fmt(n){ return new Intl.NumberFormat('en-US', {maximumFractionDigits:2}).format(n); }
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function setStatus(text, color, pulse){
@@ -555,7 +562,7 @@ function renderPhases(){
       </div>
       <div class="phase-progress-wrap">
         <div class="phase-progress-bar"><div style="width:${phPct}%"></div></div>
-        <div class="count">${phasePurchased}/${phaseTotalQty} كمية · ${phaseDone}/${phaseIds.length} بند</div>
+        <div class="count">${phasePurchased}/${phaseTotalQty} · ${phaseDone}/${phaseIds.length}</div>
       </div>
       <div class="chev">▾</div>
     `;
@@ -581,9 +588,9 @@ function renderPhases(){
     totals.className = "phase-totals";
     totals.innerHTML = `
       <span>إجمالي المرحلة:</span>
-      <span>بدون ضريبة: <b>${fmt(phaseWithout)}</b> ريال</span>
-      <span>الضريبة: <b>${fmt(phaseTax)}</b> ريال</span>
-      <span>مع الضريبة: <b>${fmt(phaseWith)}</b> ريال</span>
+      <span>بدون ضريبة: <b class="num">${fmt(phaseWithout)}</b> ريال</span>
+      <span>الضريبة: <b class="num">${fmt(phaseTax)}</b> ريال</span>
+      <span>مع الضريبة: <b class="num">${fmt(phaseWith)}</b> ريال</span>
     `;
     body.appendChild(totals);
 
@@ -677,10 +684,25 @@ function renderItemRow(id){
   nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); });
   mid.appendChild(nameInput);
 
-  const descDiv = document.createElement("div");
-  descDiv.className = "item-desc";
-  descDiv.textContent = m.description;
-  mid.appendChild(descDiv);
+  // الوصف - قابل للتعديل
+  const descInput = document.createElement("textarea");
+  descInput.className = "item-desc-input";
+  descInput.value = m.description;
+  descInput.placeholder = "ملاحظات / وصف...";
+  descInput.rows = 1;
+  descInput.addEventListener("input", () => {
+    descInput.style.height = "auto";
+    descInput.style.height = descInput.scrollHeight + "px";
+  });
+  descInput.addEventListener("change", () => {
+    setItemMeta(id, {description: descInput.value});
+  });
+  mid.appendChild(descInput);
+  // توسيع تلقائي عند التحميل
+  setTimeout(()=>{
+    descInput.style.height = "auto";
+    descInput.style.height = descInput.scrollHeight + "px";
+  }, 0);
 
   const controls = document.createElement("div");
   controls.className = "item-controls";
