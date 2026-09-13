@@ -50,9 +50,6 @@
     transition:all .15s;}
   .filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
   .filter-btn:not(.active):hover{border-color:var(--orange);color:var(--orange);}
-  .add-btn{background:var(--orange);color:#fff;border:none;padding:8px 16px;border-radius:999px;
-    font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;}
-  .add-btn:hover{background:#E56700;}
 
   .phase{background:var(--card);border:1px solid var(--line);border-radius:16px;
     margin-bottom:16px;overflow:hidden;}
@@ -126,6 +123,38 @@
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   .saving-pulse{animation:pulse 1s infinite;}
+
+  /* زر إضافة بند */
+  .add-item-btn{background:transparent;border:2px dashed #C7BFB0;color:var(--text-dim);
+    padding:12px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;
+    width:calc(100% - 36px);margin:14px 18px;transition:all .15s;font-weight:600;}
+  .add-item-btn:hover{border-color:var(--orange);color:var(--orange);background:#FFF9F3;}
+
+  /* نافذة منبثقة */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:1000;
+    align-items:center;justify-content:center;padding:20px;}
+  .modal-bg.open{display:flex;}
+  .modal{background:#fff;border-radius:16px;padding:24px;max-width:440px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;}
+  .modal h3{margin:0 0 6px;font-size:18px;}
+  .modal .modal-sub{color:var(--text-dim);font-size:13px;margin-bottom:18px;}
+  .modal label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:4px;margin-top:12px;}
+  .modal input, .modal textarea{width:100%;padding:9px 12px;border:1px solid var(--line);
+    border-radius:8px;font-family:inherit;font-size:13.5px;background:#FAFAF8;color:var(--text);}
+  .modal input:focus, .modal textarea:focus{border-color:var(--orange);background:#fff;outline:none;}
+  .modal textarea{resize:vertical;min-height:60px;}
+  .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .modal .tax-opts{display:flex;gap:8px;margin-top:6px;}
+  .modal .tax-opt{flex:1;padding:10px;border:1px solid var(--line);border-radius:8px;
+    background:#FAFAF8;font-family:inherit;font-size:12.5px;cursor:pointer;text-align:center;
+    color:var(--text-dim);transition:all .15s;}
+  .modal .tax-opt.active{border-color:var(--orange);background:#FFF1E0;color:var(--orange);font-weight:700;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .modal-actions button{flex:1;padding:11px;border-radius:9px;font-family:inherit;
+    font-size:14px;cursor:pointer;font-weight:600;border:none;}
+  .modal-actions .btn-cancel{background:#F0EDE7;color:var(--text);}
+  .modal-actions .btn-save{background:var(--orange);color:#fff;}
+  .modal-actions .btn-save:hover{background:#E56700;}
 </style>
 </head>
 <body>
@@ -183,12 +212,46 @@
 <footer>مزامنة لحظية عبر Supabase — أي تعديل يظهر فوراً لجميع الأطراف.</footer>
 </div>
 
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <h3>➕ إضافة بند جديد</h3>
+    <div class="modal-sub">المرحلة: <b id="modalPhaseName"></b></div>
+
+    <label>اسم البند *</label>
+    <input type="text" id="newName" placeholder="مثال: لوحة إعلانية" autofocus>
+
+    <label>الوصف (اختياري)</label>
+    <textarea id="newDesc" placeholder="وصف مختصر..."></textarea>
+
+    <div class="row2">
+      <div>
+        <label>الكمية</label>
+        <input type="number" id="newQty" value="1" min="0" step="1">
+      </div>
+      <div>
+        <label>سعر الوحدة (ريال)</label>
+        <input type="number" id="newPrice" value="0" min="0" step="0.01">
+      </div>
+    </div>
+
+    <label>نوع السعر</label>
+    <div class="tax-opts">
+      <button type="button" class="tax-opt active" data-tax="false">غير شامل الضريبة</button>
+      <button type="button" class="tax-opt" data-tax="true">شامل الضريبة</button>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="cancelAdd">إلغاء</button>
+      <button type="button" class="btn-save" id="saveAdd">إضافة البند</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
 const TAX_RATE = 0.15;
 
-// ترتيب المراحل: الثانية أولاً
 const PHASE_ORDER = [
   { key:"p2", title:"المرحلة الأولى", sub:"تجهيزات مكتب الرئيس وغرفة الاجتماعات" },
   { key:"p1", title:"المرحلة الثانية", sub:"تجهيزات المبنى بالهوية البصرية" },
@@ -196,7 +259,7 @@ const PHASE_ORDER = [
 ];
 
 let state = { items: {} };
-let itemsMeta = {}; // id -> {name, description, unit, total_qty, unit_price, tax_included, phase, sort_order}
+let itemsMeta = {};
 let currentFilter = "الكل";
 let saveTimer = null;
 let saveInFlight = false;
@@ -216,16 +279,11 @@ function setStatus(text, color, pulse){
 }
 
 function sbHeaders(extra = {}){
-  return Object.assign({
-    "apikey": SUPABASE_KEY,
-    "Content-Type": "application/json"
-  }, extra);
+  return Object.assign({"apikey": SUPABASE_KEY, "Content-Type": "application/json"}, extra);
 }
 
 async function sbFetch(path, options = {}){
-  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, Object.assign({
-    headers: sbHeaders()
-  }, options));
+  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, Object.assign({headers: sbHeaders()}, options));
   if(!res.ok){
     const text = await res.text();
     throw new Error("Supabase " + res.status + ": " + text);
@@ -240,11 +298,7 @@ async function apiGet(){
   const items = {};
   const meta = {};
   (data || []).forEach(row => {
-    items[row.id] = {
-      done: !!row.done,
-      assignee: row.assignee || "",
-      completedQty: Number(row.completed_qty) || 0
-    };
+    items[row.id] = {done: !!row.done, assignee: row.assignee || "", completedQty: Number(row.completed_qty) || 0};
     meta[row.id] = {
       name: row.name || "",
       description: row.description || "",
@@ -291,11 +345,7 @@ async function apiPut(data){
 
 function applyRemoteRow(row){
   if(!row || !row.id) return;
-  state.items[row.id] = {
-    done: !!row.done,
-    assignee: row.assignee || "",
-    completedQty: Number(row.completed_qty) || 0
-  };
+  state.items[row.id] = {done: !!row.done, assignee: row.assignee || "", completedQty: Number(row.completed_qty) || 0};
   itemsMeta[row.id] = {
     name: row.name || "",
     description: row.description || "",
@@ -438,7 +488,6 @@ function renderOverall(){
   const ids = allIds();
   let grandWithout = 0, grandTax = 0, grandWith = 0;
   let completedCount = 0, totalQty = 0, purchasedQty = 0;
-  const counts = {"بدر":0,"ريان":0,"سليمان":0};
 
   ids.forEach(id => {
     const c = calcItem(id);
@@ -447,11 +496,7 @@ function renderOverall(){
     grandWith += c.line_with_tax;
     totalQty += c.total_qty;
     purchasedQty += c.completed;
-    if(c.done){
-      completedCount++;
-      const s = getItemState(id);
-      if(counts.hasOwnProperty(s.assignee)) counts[s.assignee]++;
-    }
+    if(c.done) completedCount++;
   });
 
   const pct = totalQty ? Math.round((purchasedQty / totalQty) * 100) : 0;
@@ -523,7 +568,15 @@ function renderPhases(){
       visibleIds.forEach(id => body.appendChild(renderItemRow(id)));
     }
 
-    // إجماليات المرحلة
+    const btn = document.createElement("button");
+    btn.className = "add-item-btn";
+    btn.textContent = "➕ إضافة بند جديد في هذه المرحلة";
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openAddModal(ph.key, ph.title);
+    });
+    body.appendChild(btn);
+
     const totals = document.createElement("div");
     totals.className = "phase-totals";
     totals.innerHTML = `
@@ -552,16 +605,15 @@ function renderItemRow(id){
   const row = document.createElement("div");
   row.className = "item" + (c.done ? " done" : c.completed > 0 ? " partial" : "");
 
-  // اليمين (اليمين في RTL) - معلومات وتحكم
   const right = document.createElement("div");
   right.className = "item-right";
   right.innerHTML = `
     <div class="item-total">${fmt(c.line_with_tax)} ريال</div>
-    <div class="item-total-tax">${m.tax_included ? 'شامل الضريبة' : 'بدون ضريبة: ' + fmt(c.line_without_tax) + ' + ' + fmt(c.line_tax)}</div>
+    <div class="item-total-tax">${m.tax_included ? 'شامل الضريبة' : 'بدون ضريبة: ' + fmt(c.line_without_tax)}</div>
     <div class="item-actions"></div>
   `;
   const actionsEl = right.querySelector(".item-actions");
-  
+
   const assignSel = document.createElement("select");
   assignSel.className = "assignee-sel " + (s.assignee ? "set-" + s.assignee : "");
   assignSel.innerHTML = `<option value="">غير محدد</option><option value="بدر">بدر</option><option value="ريان">ريان</option><option value="سليمان">سليمان</option>`;
@@ -587,7 +639,6 @@ function renderItemRow(id){
   });
   actionsEl.appendChild(delBtn);
 
-  // اليسار - الحالة
   const statusWrap = document.createElement("div");
   statusWrap.className = "status-control";
   const statusSel = document.createElement("select");
@@ -615,7 +666,6 @@ function renderItemRow(id){
   });
   statusWrap.appendChild(statusSel);
 
-  // الوسط - الاسم والوصف والتحكم
   const mid = document.createElement("div");
   mid.className = "item-row1";
 
@@ -624,7 +674,7 @@ function renderItemRow(id){
   nameInput.type = "text";
   nameInput.value = m.name;
   nameInput.placeholder = "اسم البند";
-  nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); render(); });
+  nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); });
   mid.appendChild(nameInput);
 
   const descDiv = document.createElement("div");
@@ -671,6 +721,91 @@ function renderItemRow(id){
   row.appendChild(right);
   return row;
 }
+
+// ============ إضافة بنود جديدة ============
+let pendingPhase = null;
+let pendingTaxIncluded = false;
+
+const addModal = document.getElementById("addModal");
+const modalPhaseName = document.getElementById("modalPhaseName");
+const newNameInput = document.getElementById("newName");
+const newDescInput = document.getElementById("newDesc");
+const newQtyInput = document.getElementById("newQty");
+const newPriceInput = document.getElementById("newPrice");
+const taxOpts = document.querySelectorAll(".tax-opt");
+
+function openAddModal(phaseKey, phaseTitle){
+  pendingPhase = phaseKey;
+  pendingTaxIncluded = false;
+  modalPhaseName.textContent = phaseTitle;
+  newNameInput.value = "";
+  newDescInput.value = "";
+  newQtyInput.value = "1";
+  newPriceInput.value = "0";
+  taxOpts.forEach(o => o.classList.toggle("active", o.dataset.tax === "false"));
+  addModal.classList.add("open");
+  setTimeout(()=>newNameInput.focus(), 100);
+}
+
+function closeAddModal(){
+  addModal.classList.remove("open");
+  pendingPhase = null;
+}
+
+taxOpts.forEach(opt => {
+  opt.addEventListener("click", () => {
+    pendingTaxIncluded = opt.dataset.tax === "true";
+    taxOpts.forEach(o => o.classList.toggle("active", o === opt));
+  });
+});
+
+document.getElementById("cancelAdd").addEventListener("click", closeAddModal);
+addModal.addEventListener("click", (e) => { if(e.target === addModal) closeAddModal(); });
+
+document.getElementById("saveAdd").addEventListener("click", async () => {
+  const name = newNameInput.value.trim();
+  if(!name){ alert("اكتب اسم البند"); return; }
+  const qty = Math.max(1, Number(newQtyInput.value) || 1);
+  const price = Math.max(0, Number(newPriceInput.value) || 0);
+
+  const newId = pendingPhase + "-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+
+  const samePhaseIds = Object.keys(itemsMeta).filter(id => itemsMeta[id].phase === pendingPhase);
+  const maxSort = samePhaseIds.reduce((m,id) => Math.max(m, itemsMeta[id].sort_order || 0), 0);
+
+  const newMeta = {
+    name: name,
+    description: newDescInput.value.trim(),
+    unit: "وحدة",
+    total_qty: qty,
+    unit_price: price,
+    tax_included: pendingTaxIncluded,
+    phase: pendingPhase,
+    sort_order: maxSort + 1
+  };
+
+  itemsMeta[newId] = newMeta;
+  state.items[newId] = {done:false, assignee:"", completedQty:0};
+
+  closeAddModal();
+  render();
+  setStatus("جاري الإضافة...", "#FFD39B", true);
+
+  try{
+    await sbFetch("procurement_items?on_conflict=id", {
+      method: "POST",
+      headers: sbHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
+      body: JSON.stringify([Object.assign({id:newId, done:false, assignee:"", completed_qty:0, updated_at:new Date().toISOString()}, newMeta)])
+    });
+    setStatus(realtimeConnected ? "متصل لحظياً ✓" : "تمت الإضافة ✓", "#8DE0C8");
+  }catch(e){
+    console.error(e);
+    alert("فشلت الإضافة: " + e.message);
+    delete itemsMeta[newId];
+    delete state.items[newId];
+    render();
+  }
+});
 
 document.getElementById("filters").addEventListener("click", (e)=>{
   const btn = e.target.closest(".filter-btn");
