@@ -627,4 +627,77 @@ function renderItemRow(id){
   nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); render(); });
   mid.appendChild(nameInput);
 
-  const descDiv
+  const descDiv = document.createElement("div");
+  descDiv.className = "item-desc";
+  descDiv.textContent = m.description;
+  mid.appendChild(descDiv);
+
+  const controls = document.createElement("div");
+  controls.className = "item-controls";
+
+  const qtyLabel = document.createElement("label");
+  qtyLabel.innerHTML = `الكمية <input type="number" min="0" step="1" value="${m.total_qty}">`;
+  const qtyInput = qtyLabel.querySelector("input");
+  qtyInput.addEventListener("change", () => {
+    const v = Math.max(0, Number(qtyInput.value) || 0);
+    setItemMeta(id, {total_qty: v});
+    render();
+  });
+  controls.appendChild(qtyLabel);
+
+  const priceLabel = document.createElement("label");
+  priceLabel.innerHTML = `سعر الوحدة <input type="number" min="0" step="0.01" value="${m.unit_price}">`;
+  const priceInput = priceLabel.querySelector("input");
+  priceInput.addEventListener("change", () => {
+    const v = Math.max(0, Number(priceInput.value) || 0);
+    setItemMeta(id, {unit_price: v});
+    render();
+  });
+  controls.appendChild(priceLabel);
+
+  const taxBtn = document.createElement("button");
+  taxBtn.className = "tax-toggle " + (m.tax_included ? "included" : "not-included");
+  taxBtn.textContent = m.tax_included ? "✓ شامل الضريبة" : "✗ غير شامل الضريبة";
+  taxBtn.addEventListener("click", () => {
+    setItemMeta(id, {tax_included: !m.tax_included});
+    render();
+  });
+  controls.appendChild(taxBtn);
+
+  mid.appendChild(controls);
+
+  row.appendChild(statusWrap);
+  row.appendChild(mid);
+  row.appendChild(right);
+  return row;
+}
+
+document.getElementById("filters").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".filter-btn");
+  if(!btn) return;
+  currentFilter = btn.dataset.f;
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active", b===btn));
+  renderPhases();
+});
+
+document.getElementById("whoAmI").addEventListener("change", (e)=>{
+  localStorage.setItem("sme-tracker-who", e.target.value);
+});
+
+document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
+
+(async function(){
+  const who = localStorage.getItem("sme-tracker-who");
+  if(who) document.getElementById("whoAmI").value = who;
+  render();
+  try{
+    await loadState();
+    subscribeRealtime();
+  }catch(e){
+    console.error(e);
+    setStatus("خطأ في الاتصال", "#FFB4A2");
+  }
+})();
+</script>
+</body>
+</html>
