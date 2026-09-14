@@ -10,6 +10,7 @@
     --navy:#16233F; --navy-light:#243B6B; --orange:#FF7704; --orange-soft:#FFE7D1;
     --teal:#2BB5A0; --bg:#FAF8F5; --card:#FFFFFF; --line:#E7E2D9;
     --text:#20242E; --text-dim:#767A85; --red:#D64545; --green:#2BB5A0;
+    --purple:#7C5CFF; --purple-soft:#EEE9FF;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -39,8 +40,14 @@
   .fs-card.spent{background:linear-gradient(135deg,#2BB5A0,#1D8E7B);}
   .fs-card.remaining{background:linear-gradient(135deg,#FF7704,#E56300);}
   .fs-card.total{background:#33436B;}
+  .fs-card.sale{background:linear-gradient(135deg,#7C5CFF,#5B3EE8);}
+  .fs-card.profit{background:linear-gradient(135deg,#1FAA59,#138546);}
+  .fs-card.loss{background:linear-gradient(135deg,#D64545,#A52E2E);}
   .fs-card .fs-label{font-size:11.5px;color:#CDD5E6;opacity:.95;}
   .fs-card.spent .fs-label,
+  .fs-card.sale .fs-label,
+  .fs-card.profit .fs-label,
+  .fs-card.loss .fs-label,
   .fs-card.remaining .fs-label{color:#fff;opacity:.9;}
   .fs-card .fs-amount{font-size:22px;font-weight:800;color:#fff;margin-top:4px;
     direction:ltr;text-align:left;font-family:'Segoe UI',sans-serif;
@@ -48,11 +55,13 @@
   .fs-card .fs-cur{font-size:11px;color:#CDD5E6;font-weight:400;margin-inline-start:4px;}
   .fs-card .fs-pct{font-size:11px;color:#E6FFF9;margin-top:2px;}
   .fs-card.spent .fs-pct{color:#E6FFF9;}
+  .fs-card.sale .fs-pct{color:#F0EAFF;}
+  .fs-card.profit .fs-pct{color:#E3F9EB;}
+  .fs-card.loss .fs-pct{color:#FBE5E5;}
   .fs-card.remaining .fs-pct{color:#FFF1DF;}
   .fs-card .fs-bar{height:3px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:8px;overflow:hidden;}
   .fs-card .fs-bar > div{height:100%;background:#fff;border-radius:99px;transition:width .3s;}
 
-  /* ===== الشريط العلوي ===== */
   .overall{display:flex;gap:18px;align-items:center;background:#1D2C4E;border-radius:14px;
     padding:16px 18px;flex-wrap:wrap;}
   .ring{position:relative;width:64px;height:64px;flex:none;}
@@ -96,6 +105,48 @@
   .phase-totals .num{direction:ltr;display:inline-block;font-family:'Segoe UI',sans-serif;}
   .phase-totals .spent-tag{color:#1D8E7B;font-weight:700;}
   .phase-totals .rem-tag{color:#a76100;font-weight:700;}
+
+  /* ===== قسم البيع والربح لكل مرحلة ===== */
+  .phase-sale{
+    background:linear-gradient(135deg,#F4F1FF 0%,#EEF8FF 100%);
+    padding:14px 18px;border-top:1px solid var(--line);
+    display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+  }
+  .sale-field{display:flex;align-items:center;gap:8px;}
+  .sale-field label{font-size:12.5px;color:var(--text-dim);font-weight:600;}
+  .sale-input{
+    width:150px;padding:8px 12px;border:2px solid #C9BCFF;border-radius:10px;
+    font-family:"Segoe UI",system-ui,sans-serif;font-size:14px;font-weight:700;
+    text-align:left;direction:ltr;background:#fff;color:var(--purple);
+    font-variant-numeric:lining-nums tabular-nums;
+    font-feature-settings:"lnum" 1,"tnum" 1;
+    transition:all .15s;
+  }
+  .sale-input:focus{border-color:var(--purple);outline:none;box-shadow:0 0 0 3px rgba(124,92,255,.15);}
+  .sale-input::placeholder{color:#B8ADDC;font-weight:400;}
+
+  .profit-info{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;}
+  .profit-info .label{color:var(--text-dim);font-weight:600;}
+  .profit-info .amount{
+    font-size:16px;font-weight:800;direction:ltr;
+    font-family:'Segoe UI',sans-serif;
+    font-variant-numeric:lining-nums tabular-nums;
+  }
+  .profit-info .pct-pill{
+    padding:4px 12px;border-radius:99px;font-size:13px;font-weight:800;
+    direction:ltr;font-family:'Segoe UI',sans-serif;
+    font-variant-numeric:lining-nums tabular-nums;
+  }
+  .profit-positive{color:#1FAA59;}
+  .profit-positive .pct-pill{background:#DCF7E7;color:#0F7D3F;}
+  .profit-negative{color:#D64545;}
+  .profit-negative .pct-pill{background:#FDE5E5;color:#B22F2F;}
+  .profit-neutral{color:var(--text-dim);}
+  .profit-neutral .pct-pill{background:#EFEAE1;color:var(--text-dim);}
+  .profit-warning{
+    font-size:11px;color:#a76100;background:#FFF1DF;padding:3px 8px;border-radius:6px;
+    font-weight:600;
+  }
 
   .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;flex-wrap:wrap;}
   .item:last-child{border-bottom:none;}
@@ -160,6 +211,7 @@
     .phase-progress-wrap{width:70px;}
     .item-right{min-width:100%;align-items:flex-start;}
     .fs-card .fs-amount{font-size:18px;}
+    .sale-input{width:120px;}
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
   .saving-pulse{animation:pulse 1s infinite;}
@@ -223,10 +275,8 @@
       </div>
     </div>
 
-    <!-- الملخص المالي الرئيسي -->
     <div class="financial-summary" id="financialSummary"></div>
 
-    <!-- شريط التقدم -->
     <div class="overall">
       <div class="ring">
         <svg width="64" height="64" viewBox="0 0 64 64">
@@ -307,8 +357,10 @@ const PHASE_ORDER = [
 
 let state = { items: {} };
 let itemsMeta = {};
+let phasesSale = { p1:0, p2:0, p3:0 };
 let currentFilter = "الكل";
 let saveTimer = null;
+let saveTimerSale = null;
 let saveInFlight = false;
 let dirtyLocal = false;
 let supabaseClient = null;
@@ -366,6 +418,18 @@ async function apiGet(){
   return { items, meta };
 }
 
+async function apiGetPhases(){
+  try{
+    const data = await sbFetch("procurement_phases?select=*");
+    const phases = { p1:0, p2:0, p3:0 };
+    (data || []).forEach(row => { phases[row.phase_key] = Number(row.sale_amount) || 0; });
+    return phases;
+  }catch(e){
+    console.warn("phases table not ready", e);
+    return { p1:0, p2:0, p3:0 };
+  }
+}
+
 async function apiPut(data){
   const rows = Object.entries(data).map(([id, s]) => ({
     id,
@@ -393,6 +457,19 @@ async function apiPut(data){
     dirtyLocal = false;
   } finally {
     saveInFlight = false;
+  }
+}
+
+async function apiPutSale(phaseKey, amount){
+  try{
+    await sbFetch("procurement_phases?on_conflict=phase_key", {
+      method: "POST",
+      headers: sbHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
+      body: JSON.stringify([{phase_key: phaseKey, sale_amount: Math.max(0, Number(amount) || 0), updated_at: new Date().toISOString()}])
+    });
+  }catch(e){
+    console.error("save sale failed", e);
+    throw e;
   }
 }
 
@@ -429,6 +506,14 @@ function subscribeRealtime(){
         setStatus("تحديث لحظي ✓", "#8DE0C8");
       }
     )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'procurement_phases' },
+      (payload) => {
+        if(!payload.new || !payload.new.phase_key) return;
+        phasesSale[payload.new.phase_key] = Number(payload.new.sale_amount) || 0;
+        render();
+      }
+    )
     .subscribe((status) => {
       if(status === 'SUBSCRIBED'){
         realtimeConnected = true;
@@ -448,6 +533,7 @@ function subscribeRealtime(){
       const remote = await apiGet();
       state = { items: remote.items };
       itemsMeta = remote.meta;
+      phasesSale = await apiGetPhases();
       render();
     }catch(e){ console.warn("fallback sync failed", e); }
   }, 30000);
@@ -460,6 +546,7 @@ async function loadState(){
     const remote = await apiGet();
     state = { items: remote.items };
     itemsMeta = remote.meta;
+    phasesSale = await apiGetPhases();
     if(!realtimeConnected) setStatus("متصل ✓", "#8DE0C8");
   }catch(e){
     console.log("remote load failed", e);
@@ -489,6 +576,19 @@ function queueSave(ids){
   }, 400);
 }
 
+function queueSaveSale(phaseKey, amount){
+  setStatus("جاري الحفظ...", "#FFD39B", true);
+  clearTimeout(saveTimerSale);
+  saveTimerSale = setTimeout(async ()=>{
+    try{
+      await apiPutSale(phaseKey, amount);
+      setStatus(realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓", "#8DE0C8");
+    }catch(e){
+      setStatus("فشل حفظ البيع", "#FFB4A2");
+    }
+  }, 500);
+}
+
 function getItemState(id){
   if(state.items[id]) return Object.assign({done:false, assignee:"", completedQty:0}, state.items[id]);
   return { done:false, assignee:"", completedQty:0 };
@@ -509,7 +609,6 @@ function setItemMeta(id, patch){
   queueSave([id]);
 }
 
-// حساب تفاصيل البند
 function calcItem(id){
   const m = getItemMeta(id);
   const s = getItemState(id);
@@ -541,6 +640,18 @@ function calcItem(id){
 
 function allIds(){ return Object.keys(itemsMeta); }
 
+function calcPhaseCosts(phaseKey){
+  const phaseIds = allIds().filter(id => getItemMeta(id).phase === phaseKey);
+  let costWith = 0, costWithout = 0, costTax = 0;
+  phaseIds.forEach(id => {
+    const c = calcItem(id);
+    costWith += c.line_with_tax;
+    costWithout += c.line_without_tax;
+    costTax += c.line_tax;
+  });
+  return { costWith, costWithout, costTax };
+}
+
 function render(){
   renderFinancialSummary();
   renderProgress();
@@ -566,6 +677,13 @@ function renderFinancialSummary(){
   const spentPct = totalWith > 0 ? Math.round((spentWith / totalWith) * 100) : 0;
   const remPct = 100 - spentPct;
 
+  // إجمالي البيع والربح
+  const totalSale = (Number(phasesSale.p1)||0) + (Number(phasesSale.p2)||0) + (Number(phasesSale.p3)||0);
+  const totalProfit = totalSale - totalWith;
+  const totalProfitPct = totalSale > 0 ? (totalProfit / totalSale) * 100 : 0;
+  const profitClass = totalSale === 0 ? 'profit-neutral' : (totalProfit >= 0 ? 'profit-positive' : 'profit-negative');
+  const profitLabel = totalSale === 0 ? '—' : (totalProfit >= 0 ? '' : '-');
+
   document.getElementById("financialSummary").innerHTML = `
     <div class="fs-card spent">
       <div class="fs-label">المنفَق (المنجز)</div>
@@ -583,6 +701,16 @@ function renderFinancialSummary(){
       <div class="fs-label">إجمالي المشروع (مع الضريبة)</div>
       <div class="fs-amount">${fmt(totalWith)}<span class="fs-cur">ريال</span></div>
       <div class="fs-pct">بدون ضريبة: ${fmt(totalWithout)} | ضريبة: ${fmt(totalTax)}</div>
+    </div>
+    <div class="fs-card sale">
+      <div class="fs-label">💰 إجمالي البيع</div>
+      <div class="fs-amount">${fmt(totalSale)}<span class="fs-cur">ريال</span></div>
+      <div class="fs-pct">مجموع البيع من المراحل الثلاث</div>
+    </div>
+    <div class="fs-card ${totalSale === 0 ? 'total' : (totalProfit >= 0 ? 'profit' : 'loss')}">
+      <div class="fs-label">📈 إجمالي الربح</div>
+      <div class="fs-amount">${profitLabel}${fmt(Math.abs(totalProfit))}<span class="fs-cur">ريال</span></div>
+      <div class="fs-pct">${totalSale === 0 ? 'أدخل البيع لحساب الربح' : (totalProfitPct.toFixed(2) + '% من البيع')}</div>
     </div>
   `;
 }
@@ -636,6 +764,13 @@ function renderPhases(){
     const phPct = phaseTotalQty ? Math.round((phasePurchased / phaseTotalQty) * 100) : 0;
     const visibleIds = phaseIds.filter(itemPassesFilter);
 
+    // حساب الربح للمرحلة
+    const sale = Number(phasesSale[ph.key]) || 0;
+    const profit = sale - phaseWith;
+    const profitPct = sale > 0 ? (profit / sale) * 100 : 0;
+    const profitClass = sale === 0 ? 'profit-neutral' : (profit >= 0 ? 'profit-positive' : 'profit-negative');
+    const profitLabel = sale === 0 ? '—' : (profit >= 0 ? '' : '-');
+
     const phaseEl = document.createElement("div");
     phaseEl.className = "phase open";
 
@@ -681,6 +816,31 @@ function renderPhases(){
       <span class="rem-tag">المتبقي: <b class="num">${fmt(phaseRemaining)}</b> ريال</span>
     `;
     body.appendChild(totals);
+
+    // ===== قسم البيع والربح =====
+    const saleSection = document.createElement("div");
+    saleSection.className = "phase-sale";
+    saleSection.innerHTML = `
+      <div class="sale-field">
+        <label>💵 قيمة البيع:</label>
+        <input type="number" class="sale-input" min="0" step="0.01" value="${sale || ''}" placeholder="0">
+        <span style="font-size:13px;color:var(--text-dim);">ريال</span>
+      </div>
+      <div class="profit-info ${profitClass}">
+        <span class="label">📈 الربح:</span>
+        <span class="amount">${profitLabel}${fmt(Math.abs(profit))} ريال</span>
+        <span class="pct-pill">${sale > 0 ? (profit >= 0 ? '+' : '') + profitPct.toFixed(2) + '%' : '—'}</span>
+      </div>
+    `;
+    const saleInput = saleSection.querySelector(".sale-input");
+    saleInput.addEventListener("click", e => e.stopPropagation());
+    saleInput.addEventListener("change", () => {
+      const v = Math.max(0, Number(saleInput.value) || 0);
+      phasesSale[ph.key] = v;
+      queueSaveSale(ph.key, v);
+      render();
+    });
+    body.appendChild(saleSection);
 
     head.addEventListener("click", () => {
       phaseEl.classList.toggle("open");
@@ -833,7 +993,6 @@ function renderItemRow(id){
   return row;
 }
 
-// ============ إضافة بنود جديدة ============
 let pendingPhase = null;
 let pendingTaxExempt = false;
 
