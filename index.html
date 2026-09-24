@@ -29,14 +29,11 @@
   #saveStatus{font-size:12px;min-width:120px;text-align:center;padding:5px 10px;border-radius:6px;
     background:#1a2846;transition:all .2s;}
 
-  /* ===== الملخص المالي الرئيسي ===== */
   .financial-summary{
     display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
     gap:12px;background:#1D2C4E;border-radius:14px;padding:16px 18px;
   }
-  .fs-card{
-    background:#243A66;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;
-  }
+  .fs-card{background:#243A66;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
   .fs-card.spent{background:linear-gradient(135deg,#2BB5A0,#1D8E7B);}
   .fs-card.remaining{background:linear-gradient(135deg,#FF7704,#E56300);}
   .fs-card.total{background:#33436B;}
@@ -44,18 +41,14 @@
   .fs-card.profit{background:linear-gradient(135deg,#1FAA59,#138546);}
   .fs-card.loss{background:linear-gradient(135deg,#D64545,#A52E2E);}
   .fs-card .fs-label{font-size:11.5px;color:#CDD5E6;opacity:.95;}
-  .fs-card.spent .fs-label,
-  .fs-card.sale .fs-label,
-  .fs-card.profit .fs-label,
-  .fs-card.loss .fs-label,
-  .fs-card.remaining .fs-label{color:#fff;opacity:.9;}
+  .fs-card.spent .fs-label,.fs-card.sale .fs-label,.fs-card.profit .fs-label,
+  .fs-card.loss .fs-label,.fs-card.remaining .fs-label{color:#fff;opacity:.9;}
   .fs-card .fs-amount{font-size:22px;font-weight:800;color:#fff;margin-top:4px;
     direction:ltr;text-align:left;font-family:'Segoe UI',sans-serif;
     font-variant-numeric:lining-nums tabular-nums;}
   .fs-card .fs-cur{font-size:11px;color:#CDD5E6;font-weight:400;margin-inline-start:4px;}
   .fs-card .fs-pct{font-size:11px;color:#E6FFF9;margin-top:2px;}
-  .fs-card.spent .fs-pct{color:#E6FFF9;}
-  .fs-card.sale .fs-pct{color:#F0EAFF;}
+  .fs-card.spent .fs-pct,.fs-card.sale .fs-pct{color:#F0EAFF;}
   .fs-card.profit .fs-pct{color:#E3F9EB;}
   .fs-card.loss .fs-pct{color:#FBE5E5;}
   .fs-card.remaining .fs-pct{color:#FFF1DF;}
@@ -106,7 +99,6 @@
   .phase-totals .spent-tag{color:#1D8E7B;font-weight:700;}
   .phase-totals .rem-tag{color:#a76100;font-weight:700;}
 
-  /* ===== قسم البيع والربح لكل مرحلة ===== */
   .phase-sale{
     background:linear-gradient(135deg,#F4F1FF 0%,#EEF8FF 100%);
     padding:14px 18px;border-top:1px solid var(--line);
@@ -143,10 +135,7 @@
   .profit-negative .pct-pill{background:#FDE5E5;color:#B22F2F;}
   .profit-neutral{color:var(--text-dim);}
   .profit-neutral .pct-pill{background:#EFEAE1;color:var(--text-dim);}
-  .profit-warning{
-    font-size:11px;color:#a76100;background:#FFF1DF;padding:3px 8px;border-radius:6px;
-    font-weight:600;
-  }
+  .profit-warning{font-size:11px;color:#a76100;background:#FFF1DF;padding:3px 8px;border-radius:6px;font-weight:600;}
 
   .item{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid #F1EDE5;flex-wrap:wrap;}
   .item:last-child{border-bottom:none;}
@@ -168,14 +157,13 @@
   .item-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;}
   .item-controls label{font-size:11.5px;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;}
   .item-controls input{width:85px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;
-    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;font-size:12.5px;text-align:center;
+    font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;text-align:center;
     background:#fff;direction:ltr;font-variant-numeric:lining-nums tabular-nums;
-    font-feature-settings:"lnum" 1,"tnum" 1;-webkit-font-feature-settings:"lnum" 1,"tnum" 1;}
+    font-feature-settings:"lnum" 1,"tnum" 1;}
   .item-controls input:focus{border-color:var(--orange);outline:none;}
 
   .tax-toggle{background:#F6F3EE;border:1px solid var(--line);border-radius:6px;
-    padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;
-    transition:all .15s;}
+    padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;}
   .tax-toggle.tax-yes{background:#FFF1DF;border-color:#F1C98E;color:#a76100;}
   .tax-toggle.tax-no{background:#E4F7EE;border-color:#A9E3C4;color:#087d65;}
   .tax-toggle:hover{transform:translateY(-1px);}
@@ -234,8 +222,7 @@
   .modal input[type=number]{direction:ltr;text-align:left;
     font-family:"Segoe UI",system-ui,sans-serif;
     font-variant-numeric:lining-nums tabular-nums;
-    font-feature-settings:"lnum" 1,"tnum" 1;
-    -webkit-font-feature-settings:"lnum" 1,"tnum" 1;}
+    font-feature-settings:"lnum" 1,"tnum" 1;}
   .modal input:focus, .modal textarea:focus{border-color:var(--orange);background:#fff;outline:none;}
   .modal textarea{resize:vertical;min-height:60px;}
   .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -342,9 +329,7 @@
       <button type="button" class="btn-save" id="saveAdd">إضافة البند</button>
     </div>
   </div>
-</div>
-
-<script>
+</div><script>
 const SUPABASE_URL = "https://dekrtcjksdbymwbfuymh.supabase.co";
 const SUPABASE_KEY = "sb_publishable_2yv2wAqRRX13dx8KIexKdQ_pyqG6Y4q";
 const TAX_RATE = 0.15;
@@ -677,7 +662,6 @@ function renderFinancialSummary(){
   const spentPct = totalWith > 0 ? Math.round((spentWith / totalWith) * 100) : 0;
   const remPct = 100 - spentPct;
 
-  // إجمالي البيع والربح
   const totalSale = (Number(phasesSale.p1)||0) + (Number(phasesSale.p2)||0) + (Number(phasesSale.p3)||0);
   const totalProfit = totalSale - totalWith;
   const totalProfitPct = totalSale > 0 ? (totalProfit / totalSale) * 100 : 0;
@@ -764,7 +748,6 @@ function renderPhases(){
     const phPct = phaseTotalQty ? Math.round((phasePurchased / phaseTotalQty) * 100) : 0;
     const visibleIds = phaseIds.filter(itemPassesFilter);
 
-    // حساب الربح للمرحلة
     const sale = Number(phasesSale[ph.key]) || 0;
     const profit = sale - phaseWith;
     const profitPct = sale > 0 ? (profit / sale) * 100 : 0;
@@ -817,7 +800,6 @@ function renderPhases(){
     `;
     body.appendChild(totals);
 
-    // ===== قسم البيع والربح =====
     const saleSection = document.createElement("div");
     saleSection.className = "phase-sale";
     saleSection.innerHTML = `
