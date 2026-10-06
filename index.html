@@ -512,6 +512,85 @@
   .add-item-btn{background:#f0f3f8;border-color:#d2dbe8}
   .add-item-btn:hover{background:#fff4ea}
   footer{border-color:#d7dfea}
+
+  /* Dark slate surfaces continue the navy hero through the purchasing workspace */
+  :root{--bg:#111827;--card:#1b2435;--line:#344157;--text:#e8edf5;--text-dim:#aab5c7}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(49,76,128,.24),transparent 42%),linear-gradient(180deg,#141e31 0%,#101725 55%,#141d2d 100%);color:var(--text)}
+  .filters{background:rgba(27,37,55,.96);border-color:#354259;box-shadow:0 10px 28px rgba(0,0,0,.2)}
+  .search-box{background:#202c40;border-color:#3a4962;color:#b8c3d4}
+  .search-box input{color:#eef2f8}
+  .filter-btn{background:#202c40;border-color:#3a4962;color:#c3ccda}
+  .filter-btn.active{background:#e87932;border-color:#e87932;color:#fff;box-shadow:0 4px 14px rgba(232,121,50,.2)}
+  .phase{background:#1b2536;border-color:#354259;box-shadow:0 9px 26px rgba(0,0,0,.18)}
+  .phase:hover{border-color:#465974;box-shadow:0 12px 28px rgba(0,0,0,.24)}
+  .phase-head:hover{background:#222f45}
+  .phase-title h2{color:#f1f4f8}
+  .phase-title .sub,.phase-progress-wrap .count,.chev{color:#aab5c7}
+  .phase-num{background:#342b29;color:#ffab72}
+  .phase-body{background:linear-gradient(180deg,#1b2536,#172131);border-color:#354259}
+  .item{background:#1b2536;border-bottom-color:#303d52;color:#e8edf5}
+  .item:hover{background:#202d42}
+  .item.done{background:linear-gradient(90deg,#1b2536 0%,#1a302f 100%)}
+  .item.partial{background:linear-gradient(90deg,#1b2536 0%,#332c22 100%)}
+  .item-display-name{color:#eef2f8}
+  .item-display-desc,.item-desc-input{color:#aab5c7}
+  .item-name-input,.item-desc-input{color:#e8edf5}
+  .item-name-input:hover,.item-name-input:focus,.item-desc-input:hover,.item-desc-input:focus{background:#25334a}
+  .item-editor{border-color:#354259}
+  .item-editor>summary{background:#26334a;color:#c0cada}
+  .item-editor>summary:hover,.item-editor[open]>summary{background:#3a2a22;color:#ffb27e}
+  .status-select{background:#222e42;border-color:#3b4960;color:#e8edf5}
+  .status-select.status-done{background:#183b36;border-color:#2c665a;color:#a5e4d3}
+  .status-select.status-partial{background:#3a3020;border-color:#765822;color:#f2cf84}
+  .status-select.status-pending{background:#252f40;border-color:#3b4960;color:#c2ccda}
+  .item-right{background:#202d42;border-color:#3a4960}
+  .item-total{color:#f2f5f9}
+  .item-total-tax{color:#b5c0d0}
+  .phase-totals{background:#202b3d;border-color:#354259;color:#d5dce7}
+  .phase-totals span{color:#b1bdce}
+  .phase-totals b{color:#eef2f8}
+  .phase-totals .spent-tag{color:#82d7c0}
+  .phase-totals .rem-tag{color:#ffc17f}
+  .phase-sale{background:linear-gradient(110deg,#25233b,#202b40);border-color:#354259}
+  .sale-field label,.profit-info .label{color:#c2ccda}
+  .sale-input{background:#171f30;border-color:#7665bd;color:#d0c4ff}
+  .sale-input:focus{background:#1d2940}
+  .profit-positive{color:#8de0b8}
+  .profit-positive .pct-pill{background:#183b2d;color:#9be4b9}
+  .profit-negative{color:#ffaaa5}
+  .profit-negative .pct-pill{background:#472b31;color:#ffb6b1}
+  .profit-neutral{color:#b5c0d0}
+  .profit-neutral .pct-pill{background:#2b3547;color:#c0cada}
+  .profit-warning{background:#43371f;color:#ffd38a}
+  .add-item-btn{background:#202b3d;border-color:#46546a;color:#d1d9e5}
+  .add-item-btn:hover{background:#342820;border-color:#ad673d;color:#ffc094}
+  .empty-msg{color:#b1bdce}
+  footer{color:#9eabbf;border-color:#303d52}
+  .fs-card.total{background:#293750}
+  .modal{background:#1b2536;color:#e8edf5;border:1px solid #39475d}
+  .modal .modal-sub,.modal label{color:#b3bed0}
+  .modal input,.modal textarea{background:#202c40;border-color:#3a4960;color:#edf2f8}
+  .modal input:focus,.modal textarea:focus{background:#26344a}
+  .modal .tax-opt{background:#202c40;border-color:#3a4960;color:#c1cbda}
+  .modal .tax-opt.active{background:#3a2b22;border-color:#bd6d35;color:#ffb27e}
+  .modal-actions .btn-cancel{background:#2a3548;color:#e0e6ef}
+  .modal-actions .btn-save{background:#e87932;color:#fff}
+  .modal-actions .btn-save:hover{background:#d76825}
+  .item-controls label{color:#b1bdce}
+  .item-controls input{background:#171f30;border-color:#3a4960;color:#eef2f8}
+  .tax-toggle{background:#273247;border-color:#3d4b61;color:#d6deea}
+  .tax-toggle.tax-yes{background:#3c3020;border-color:#785b2d;color:#f4cf89}
+  .tax-toggle.tax-no{background:#183a35;border-color:#2d655b;color:#9fe3d1}
+  .del-btn{background:#202c40;border-color:#674148;color:#ffaaa8}
+  .del-btn:hover{background:#3c252c}
+  .phase-progress-bar{background:#344157}
+  .phase-progress-bar>div{background:#45b69f}
+  .financial-details{background:#1c2940;border-color:#364663}
+  .financial-details>summary{color:#f0f3f8}
+  @media(max-width:640px){
+    .filters{background:rgba(27,37,55,.98)}
+    .item-right{border-color:#3a4960}
+  }
 </style>
 </head>
 <body>
