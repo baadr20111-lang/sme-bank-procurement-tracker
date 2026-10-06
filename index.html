@@ -164,6 +164,8 @@
   .item-desc-input::placeholder{color:#BBB5AC;}
 
   .item-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;}
+  .item-display-name{font-size:14px;font-weight:700;color:var(--text);padding:2px 0;}
+  .item-display-desc{font-size:11.5px;color:var(--text-dim);line-height:1.4;}
   .item-editor{width:100%;margin-top:2px;border-top:1px solid #F1EDE5;padding-top:6px;}
   .item-editor>summary{cursor:pointer;color:var(--text-dim);font-size:11.5px;font-weight:600;
     width:max-content;padding:2px 0;}
@@ -940,13 +942,25 @@ function renderItemRow(id){
 
   const mid = document.createElement("div");
   mid.className = "item-row1";
+  const displayName = document.createElement("div");
+  displayName.className = "item-display-name";
+  displayName.textContent = m.name || "بند بدون اسم";
+  mid.appendChild(displayName);
+  const displayDesc = document.createElement("div");
+  displayDesc.className = "item-display-desc";
+  displayDesc.textContent = m.description || "";
+  displayDesc.hidden = !m.description;
+  if(m.description) mid.appendChild(displayDesc);
 
   const nameInput = document.createElement("input");
   nameInput.className = "item-name-input";
   nameInput.type = "text";
   nameInput.value = m.name;
   nameInput.placeholder = "اسم البند";
-  nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); });
+  nameInput.addEventListener("change", () => {
+    setItemMeta(id, {name: nameInput.value});
+    displayName.textContent = nameInput.value.trim() || "بند بدون اسم";
+  });
   const descInput = document.createElement("textarea");
   descInput.className = "item-desc-input";
   descInput.value = m.description;
@@ -958,6 +972,8 @@ function renderItemRow(id){
   });
   descInput.addEventListener("change", () => {
     setItemMeta(id, {description: descInput.value});
+    displayDesc.textContent = descInput.value;
+    displayDesc.hidden = !descInput.value.trim();
   });
   setTimeout(()=>{
     descInput.style.height = "auto";
