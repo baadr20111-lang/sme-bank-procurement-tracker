@@ -249,6 +249,72 @@
   .modal-actions .btn-cancel{background:#F0EDE7;color:var(--text);}
   .modal-actions .btn-save{background:var(--orange);color:#fff;}
   .modal-actions .btn-save:hover{background:#E56700;}
+
+  /* Refined layout: clear hierarchy, less cramped mobile controls */
+  .wrap{max-width:1160px}
+  header.top{background:radial-gradient(900px 360px at 100% 0%,#2b4273 0%,transparent 68%),linear-gradient(145deg,#14213b,#1d2c4e 72%);box-shadow:0 10px 30px rgba(22,35,63,.12)}
+  .team-select button{transition:background .15s,border-color .15s,transform .15s}
+  .team-select button:hover{background:#30436d!important;border-color:#6a7da8!important;transform:translateY(-1px)}
+  .overall{background:linear-gradient(120deg,rgba(255,255,255,.08),rgba(255,255,255,.025)),#1D2C4E;border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 10px 28px rgba(4,12,28,.14)}
+  .overall-text .big{font-size:19px;font-weight:800;direction:ltr;unicode-bidi:isolate;text-align:right}
+  .filters{margin:0 0 16px;padding:12px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 22px rgba(28,35,48,.045)}
+  .filter-btn{padding:8px 16px;border-radius:10px;font-size:12.5px;font-weight:650}
+  .filter-btn.active{box-shadow:0 4px 10px rgba(22,35,63,.16)}
+  .phase{border-radius:18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(25,35,55,.04);transition:border-color .15s,box-shadow .15s}
+  .phase:hover{border-color:#d5ddec;box-shadow:0 12px 28px rgba(25,35,55,.075)}
+  .phase-head{padding:17px 20px;transition:background .15s}
+  .phase-head:hover{background:#fafbfe}
+  .phase-head:focus-visible{outline:3px solid rgba(255,119,4,.45);outline-offset:-3px}
+  .phase-title h2{font-size:16px;font-weight:800}
+  .phase-progress-wrap{width:150px}
+  .phase-body{background:linear-gradient(180deg,#fff,#fdfdfc)}
+  @media(max-width:640px){
+    .wrap{padding-inline:12px}
+    header.top{padding:18px 0 15px;margin-bottom:14px}
+    header.top .wrap{gap:11px}
+    .brand{align-items:flex-start;gap:10px}
+    .brand h1{font-size:19px}
+    .brand p{font-size:11px;line-height:1.45;max-width:250px}
+    .team-select{gap:6px}
+    .team-select button{padding:6px 9px!important;font-size:11px!important}
+    #saveStatus{min-width:94px;font-size:10.5px;padding:5px 7px}
+    .overall{gap:10px;padding:11px 13px;border-radius:14px}
+    .ring{width:54px;height:54px}
+    .ring svg{width:54px;height:54px}
+    .overall-text{min-width:0}
+    .overall-text .big{font-size:16px}
+    .overall-text .small{font-size:10.5px}
+    .financial-details{margin-bottom:0}
+    .financial-details>summary{font-size:12px;padding:10px 12px}
+    .financial-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 9px 9px}
+    .fs-card{padding:10px 11px}
+    .fs-card .fs-amount{font-size:16px}
+    .filters{gap:6px;padding:9px;margin-bottom:12px;border-radius:13px}
+    .search-box{flex-basis:100%;min-width:0;padding:8px 10px}
+    .filter-btn{flex:1 1 calc(50% - 6px);padding:8px 7px;font-size:11.5px}
+    .phase{margin-bottom:10px;border-radius:14px}
+    .phase-head{gap:9px;padding:12px 11px}
+    .phase-num{width:29px;height:29px;border-radius:9px;font-size:12px}
+    .phase-title h2{font-size:13.5px}
+    .phase-title .sub{font-size:10px;line-height:1.4}
+    .phase-progress-wrap{width:76px}
+    .phase-progress-wrap .count{font-size:9.5px}
+    .item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px 10px;padding:10px 11px}
+    .status-control{grid-column:2;grid-row:1;min-width:112px;width:112px}
+    .status-select{padding:7px 22px 7px 7px;font-size:11px;border-radius:9px}
+    .item-row1{grid-column:1;grid-row:1;min-width:0;gap:4px}
+    .item-display-name{font-size:12.5px;line-height:1.45}
+    .item-display-desc{font-size:10.5px}
+    .item-right{grid-column:1/-1;min-width:0;width:100%;align-items:center;flex-direction:row;justify-content:space-between;gap:7px;padding-top:6px;border-top:1px solid #f1ede5;flex-wrap:wrap}
+    .item-total{font-size:12px}
+    .item-total-tax,.item-spent-info{font-size:9.5px}
+    .item-controls{gap:6px}
+    .item-controls label{font-size:10px}
+    .item-controls input{width:72px}
+    .phase-totals{gap:8px 12px;padding:10px 12px;font-size:10.5px}
+    .phase-sale{gap:10px;padding:11px 12px}
+    .sale-input{width:105px;padding:7px 8px;font-size:12px}
+  }
 </style>
 </head>
 <body>
@@ -802,6 +868,9 @@ function renderPhases(){
 
     const head = document.createElement("div");
     head.className = "phase-head";
+    head.setAttribute("role", "button");
+    head.setAttribute("tabindex", "0");
+    head.setAttribute("aria-expanded", String(phaseExpanded));
     head.innerHTML = `
       <div class="phase-num">${idx+1}</div>
       <div class="phase-title">
@@ -867,12 +936,20 @@ function renderPhases(){
     });
     body.appendChild(saleSection);
 
-    head.addEventListener("click", () => {
+    const togglePhase = () => {
       const willExpand = body.classList.contains("collapsed");
       body.classList.toggle("collapsed", !willExpand);
       phaseEl.classList.toggle("open", willExpand);
+      head.setAttribute("aria-expanded", String(willExpand));
       if(willExpand) expandedPhases.add(ph.key);
       else expandedPhases.delete(ph.key);
+    };
+    head.addEventListener("click", togglePhase);
+    head.addEventListener("keydown", (event) => {
+      if(event.key === "Enter" || event.key === " "){
+        event.preventDefault();
+        togglePhase();
+      }
     });
 
     phaseEl.appendChild(head);
