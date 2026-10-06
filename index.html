@@ -431,6 +431,59 @@
 
   .project-kpi-note{margin-top:3px;font-size:10.5px;color:#c6d0e2}
   .financial-details[open]>summary span:last-child{font-size:11px!important}
+
+  /* Clearer procurement dashboard hierarchy */
+  .top{position:relative;overflow:hidden}
+  .top:after{content:"";position:absolute;inset:auto auto -110px -80px;width:300px;height:300px;border:1px solid rgba(255,255,255,.07);border-radius:50%;box-shadow:0 0 0 35px rgba(255,255,255,.025),0 0 0 70px rgba(255,255,255,.018);pointer-events:none}
+  .top .wrap{position:relative;z-index:1}
+  .brand>div:first-child:before{content:"لوحة متابعة المشروع";display:inline-flex;margin-bottom:8px;padding:4px 10px;border:1px solid rgba(255,255,255,.18);border-radius:99px;color:#ffcfaa;font-size:10px;font-weight:700;letter-spacing:.2px}
+  .brand h1{font-size:clamp(23px,3.4vw,32px);letter-spacing:-.5px}
+  .brand p{max-width:680px;line-height:1.7}
+  .overall{padding:18px 22px;border-color:rgba(255,255,255,.13);background:linear-gradient(115deg,rgba(255,255,255,.09),rgba(255,255,255,.025)),#192846}
+  .ring{width:76px;height:76px}
+  .ring svg{width:76px;height:76px}
+  .ring .pct{font-size:16px}
+  .overall-text .big{font-size:21px}
+  .overall-text .small{font-size:12px;color:#c1cbe0}
+  .project-kpis{gap:12px}
+  .project-kpi{padding:15px 16px;min-height:91px;transition:transform .16s,border-color .16s,background .16s}
+  .project-kpi:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.23);background:rgba(255,255,255,.11)}
+  .project-kpi-label{font-size:11.5px}
+  .project-kpi-value{font-size:24px}
+  .financial-details{background:rgba(255,255,255,.055)}
+  .financial-details>summary{min-height:48px}
+  .dashboard-section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:22px 2px 10px}
+  .dashboard-section-head h2{margin:0;color:#18243a;font-size:18px;font-weight:800}
+  .dashboard-section-head p{margin:3px 0 0;color:#7b8494;font-size:11.5px}
+  .jump-phases{border:1px solid #dbe2ec;border-radius:10px;background:#fff;color:#243b6b;padding:9px 13px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.16s}
+  .jump-phases:hover{border-color:#e87932;color:#bd5c1c;background:#fff8f2}
+  .filters{top:10px}
+  .search-box{flex:1 1 320px}
+  .phase-progress-wrap .count{font-family:inherit;direction:rtl;text-align:left;white-space:nowrap}
+  .phase-head{min-height:82px}
+  .phase-title .sub{line-height:1.6}
+  .phase-totals{border-top:1px solid #e7ebf1}
+  .financial-details:not([open]){margin-bottom:2px}
+  .fs-card{min-height:105px}
+  footer{max-width:1240px;border-top:1px solid #e3e8f0;padding-top:14px}
+  @media(max-width:720px){
+    .overall{padding:13px}
+    .ring,.ring svg{width:60px;height:60px}
+    .project-kpi{min-height:78px}
+    .project-kpi-value{font-size:20px}
+    .dashboard-section-head{align-items:flex-start;margin-top:17px}
+    .dashboard-section-head h2{font-size:16px}
+    .dashboard-section-head p{font-size:10.5px}
+    .jump-phases{padding:8px 10px;font-size:10.5px}
+    .phase-progress-wrap .count{white-space:normal;font-size:9px}
+    .fs-card{min-height:88px}
+  }
+  @media(max-width:390px){
+    .brand>div:first-child{width:100%}
+    .project-kpis{gap:7px}
+    .project-kpi{padding:9px;min-height:72px}
+    .dashboard-section-head{flex-wrap:wrap}
+  }
 </style>
 </head>
 <body>
@@ -461,11 +514,11 @@
       </div>
       <div class="overall-text">
         <div class="big" id="overallCount">0 / 0 بند</div>
-        <div class="small">عبر المراحل الثلاث</div>
+        <div class="small">نسبة البنود المكتملة بالكامل عبر المراحل الثلاث</div>
       </div>
     </div>
     <section class="project-kpis" id="projectKpis" aria-label="ملخص البنود"></section>
-    <details class="financial-details" open>
+    <details class="financial-details">
       <summary><span>تفاصيل الميزانية والأرباح</span><span style="font-weight:400;color:#B9C2D6;">عرض عند الحاجة</span></summary>
       <div class="financial-summary" id="financialSummary"></div>
     </details>
@@ -473,6 +526,7 @@
 </header>
 
 <div class="wrap">
+  <section class="dashboard-section-head" aria-labelledby="phaseHeading"><div><h2 id="phaseHeading">مراحل المشتريات</h2><p>تابع الإنجاز والتكلفة، وافتح المرحلة لإدارة بنودها</p></div><button type="button" class="jump-phases" onclick="document.getElementById('phases').scrollIntoView({behavior:'smooth',block:'start'})">عرض المراحل ↓</button></section>
   <div class="filters" id="filters">
     <label class="search-box"><span aria-hidden="true">⌕</span><input id="itemSearch" type="search" aria-label="ابحث في بنود المشروع" placeholder="ابحث باسم البند أو الوصف"></label>
     <button class="filter-btn active" data-f="الكل">كل البنود</button>
@@ -871,7 +925,7 @@ function renderProjectKpis(){
     ["إجمالي البنود", ids.length, "كل مراحل المشروع"],
     ["مكتمل", complete, "بند منجز بالكامل"],
     ["مكتمل جزئياً", partial, "يحتاج استكمال"],
-    ["متبقي", remaining, "بند لم يكتمل بعد"]
+    ["غير مكتمل", Math.max(0, remaining-partial), "لم يبدأ بعد"]
   ];
   host.innerHTML = metrics.map(([label, value, note], index) =>
     '<article class="project-kpi" data-tone="'+(index===1?"green":index===2?"amber":"")+'"><div class="project-kpi-label">'+label+'</div><div class="project-kpi-value">'+value+'</div><div class="project-kpi-note">'+note+'</div></article>'
@@ -943,15 +997,13 @@ function renderFinancialSummary(){
 
 function renderProgress(){
   const ids = allIds();
-  let completedCount = 0, totalQty = 0, purchasedQty = 0;
+  let completedCount = 0;
   ids.forEach(id => {
     const c = calcItem(id);
-    totalQty += c.total_qty;
-    purchasedQty += c.completed;
     if(c.done) completedCount++;
   });
-  const pct = totalQty ? Math.round((purchasedQty / totalQty) * 100) : 0;
-  document.getElementById("overallCount").textContent = `${completedCount} / ${ids.length} بند مكتمل`;
+  const pct = ids.length ? Math.round((completedCount / ids.length) * 100) : 0;
+  document.getElementById("overallCount").textContent = `${completedCount} / ${ids.length} بند مكتمل بالكامل`;
   document.getElementById("ringPct").textContent = pct + "%";
   const circumference = 169.6;
   document.getElementById("ringProgress").style.strokeDashoffset = String(circumference - (circumference * pct / 100));
@@ -1019,7 +1071,7 @@ function renderPhases(){
       </div>
       <div class="phase-progress-wrap">
         <div class="phase-progress-bar"><div style="width:${phPct}%"></div></div>
-        <div class="count">${phasePurchased}/${phaseTotalQty} · ${phaseDone}/${phaseIds.length}</div>
+        <div class="count">${phaseDone}/${phaseIds.length} بند · ${phasePurchased}/${phaseTotalQty} كمية</div>
       </div>
       <div class="chev">▾</div>
     `;
