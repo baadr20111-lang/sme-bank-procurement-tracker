@@ -262,6 +262,7 @@
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
+        <button id="exportCsvBtn" title="تنزيل تقرير المشروع" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⇩ تقرير CSV</button>
         <button id="refreshBtn" title="تحديث" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
         <span id="saveStatus">جاري الاتصال...</span>
       </div>
@@ -1121,6 +1122,29 @@ document.getElementById("itemSearch").addEventListener("input", e=>{
   renderPhases();
 });
 
+function downloadProjectCsv(){
+  const rows=[["المرحلة","البند","الوصف","الوحدة","الكمية","المكتمل","المتبقي","سعر الوحدة","الضريبة","الإجمالي شامل الضريبة","المنفَق","المتبقي المالي","حالة التنفيذ","قيمة بيع المرحلة"]];
+  PHASE_ORDER.forEach(ph=>{
+    const ids=allIds().filter(id=>getItemMeta(id).phase===ph.key).sort((a,b)=>getItemMeta(a).sort_order-getItemMeta(b).sort_order);
+    const sale=Number(phasesSale[ph.key])||0;
+    ids.forEach((id,index)=>{
+      const m=getItemMeta(id),c=calcItem(id);
+      rows.push([ph.title,m.name,m.description,m.unit,m.total_qty,c.completed,Math.max(0,c.total_qty-c.completed),c.unit_price,c.line_tax,c.line_with_tax,c.spent_with_tax,c.remaining_with_tax,c.done?"مكتمل":(c.completed>0?"مكتمل جزئيًا":"غير مكتمل"),index===0?sale:""]);
+    });
+  });
+  const cell=value=>{
+    let text=String(value??"");
+    if(/^[\\s]*[=+\\-@]/.test(text))text="'"+text;
+    return '"'+text.replace(/"/g,'""')+'"';
+  };
+  const csv="\\uFEFF"+rows.map(row=>row.map(cell).join(",")).join("\\r\\n");
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const link=document.createElement("a");
+  link.href=url;link.download="تقرير-مشتريات-"+localISODate()+".csv";
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.getElementById("exportCsvBtn").addEventListener("click",downloadProjectCsv);
 document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
 
 (async function(){
