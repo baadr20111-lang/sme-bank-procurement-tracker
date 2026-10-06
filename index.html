@@ -65,7 +65,10 @@
   .overall-text .big{font-size:17px;font-weight:700;}
   .overall-text .small{font-size:12.5px;color:#AEB8CE;margin-top:2px;}
 
-  .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+  .search-box{display:flex;align-items:center;gap:8px;flex:1 1 260px;min-width:min(100%,260px);padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--text-dim);font-size:12px;}
+  .search-box input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:13px;}
+  .search-box:focus-within{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,119,4,.12);}
   .filter-btn{border:1px solid var(--line);background:var(--card);color:var(--text-dim);
     padding:7px 16px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;
     transition:all .15s;}
@@ -283,6 +286,7 @@
 
 <div class="wrap">
   <div class="filters" id="filters">
+    <label class="search-box"><span aria-hidden="true">⌕</span><input id="itemSearch" type="search" aria-label="ابحث في بنود المشروع" placeholder="ابحث باسم البند أو الوصف"></label>
     <button class="filter-btn active" data-f="الكل">الكل</button>
     <button class="filter-btn" data-f="بدر">بدر</button>
     <button class="filter-btn" data-f="ريان">ريان</button>
@@ -344,9 +348,15 @@ let state = { items: {} };
 let itemsMeta = {};
 let phasesSale = { p1:0, p2:0, p3:0 };
 let currentFilter = "الكل";
+let currentSearch = "";
+let expandedPhases = new Set(["p2"]);
 let saveTimer = null;
 let saveTimerSale = null;
 let saveInFlight = false;
+const pendingSaveVersions = new Map();
+let saveVersion = 0;
+const pendingSaleVersions = new Map();
+let saleVersion = 0;
 let dirtyLocal = false;
 let supabaseClient = null;
 let realtimeConnected = false;
@@ -439,7 +449,6 @@ async function apiPut(data){
       headers: sbHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
       body: JSON.stringify(rows)
     });
-    dirtyLocal = false;
   } finally {
     saveInFlight = false;
   }
@@ -544,34 +553,58 @@ function queueSave(ids){
   dirtyLocal = true;
   setStatus("جاري الحفظ...", "#FFD39B", true);
   const idsArr = Array.isArray(ids) ? ids : Object.keys(state.items);
+  idsArr.forEach(id => pendingSaveVersions.set(id, ++saveVersion));
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    const payload = {};
-    idsArr.forEach(id => {
-      payload[id] = Object.assign({}, state.items[id] || {}, itemsMeta[id] || {});
+  saveTimer = setTimeout(flushQueuedSave, 400);
+}
+
+async function flushQueuedSave(){
+  if(saveInFlight){ saveTimer = setTimeout(flushQueuedSave, 150); return; }
+  const versions = new Map(pendingSaveVersions);
+  if(!versions.size) return;
+  const payload = {};
+  versions.forEach((_, id) => {
+    payload[id] = Object.assign({}, state.items[id] || {}, itemsMeta[id] || {});
+  });
+  try{
+    await apiPut(payload);
+    versions.forEach((version, id) => {
+      if(pendingSaveVersions.get(id) === version) pendingSaveVersions.delete(id);
     });
-    try{
-      await apiPut(payload);
-      setStatus(realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓", "#8DE0C8");
-    }catch(e){
-      console.error("save failed", e);
-      setStatus("فشل الحفظ", "#FFB4A2");
-      dirtyLocal = true;
-    }
-  }, 400);
+    dirtyLocal = pendingSaveVersions.size > 0;
+    setStatus(dirtyLocal ? "جاري حفظ تعديلات أخرى..." : (realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓"), dirtyLocal ? "#FFD39B" : "#8DE0C8", dirtyLocal);
+    if(dirtyLocal) saveTimer = setTimeout(flushQueuedSave, 0);
+  }catch(e){
+    console.error("save failed", e);
+    dirtyLocal = true;
+    setStatus("فشل الحفظ — ستتم إعادة المحاولة", "#FFB4A2");
+    saveTimer = setTimeout(flushQueuedSave, 1500);
+  }
 }
 
 function queueSaveSale(phaseKey, amount){
+  pendingSaleVersions.set(phaseKey, {version: ++saleVersion, amount: Math.max(0, Number(amount) || 0)});
   setStatus("جاري الحفظ...", "#FFD39B", true);
   clearTimeout(saveTimerSale);
-  saveTimerSale = setTimeout(async ()=>{
-    try{
-      await apiPutSale(phaseKey, amount);
-      setStatus(realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓", "#8DE0C8");
-    }catch(e){
-      setStatus("فشل حفظ البيع", "#FFB4A2");
+  saveTimerSale = setTimeout(flushQueuedSales, 500);
+}
+
+async function flushQueuedSales(){
+  const batch = new Map(pendingSaleVersions);
+  if(!batch.size) return;
+  try{
+    for(const [phaseKey, entry] of batch){
+      await apiPutSale(phaseKey, entry.amount);
+      if(pendingSaleVersions.get(phaseKey)?.version === entry.version) pendingSaleVersions.delete(phaseKey);
     }
-  }, 500);
+    const pending = pendingSaleVersions.size > 0;
+    setStatus(pending ? "جاري حفظ تعديلات أخرى..." : (realtimeConnected ? "متصل لحظياً ✓" : "محفوظ ✓"), pending ? "#FFD39B" : "#8DE0C8", pending);
+    if(pending) saveTimerSale = setTimeout(flushQueuedSales, 0);
+  }catch(e){
+    console.error("save sale failed", e);
+    setStatus("فشل حفظ البيع — ستتم إعادة المحاولة", "#FFB4A2");
+    saveTimerSale = setTimeout(flushQueuedSales, 1500);
+  }
 }
 
 function getItemState(id){
@@ -717,7 +750,13 @@ function renderProgress(){
 
 function itemPassesFilter(id){
   const s = getItemState(id);
+  const m = getItemMeta(id);
   const c = calcItem(id);
+  if(currentSearch){
+    const query = currentSearch.trim().toLocaleLowerCase("ar");
+    const searchable = [m.name, m.description, m.unit, s.assignee].join(" ").toLocaleLowerCase("ar");
+    if(!searchable.includes(query)) return false;
+  }
   if(currentFilter === "الكل") return true;
   if(currentFilter === "متبقي") return !c.done;
   if(currentFilter === "غير محدد") return !s.assignee;
@@ -755,7 +794,8 @@ function renderPhases(){
     const profitLabel = sale === 0 ? '—' : (profit >= 0 ? '' : '-');
 
     const phaseEl = document.createElement("div");
-    phaseEl.className = "phase open";
+    const phaseExpanded = currentSearch.trim() ? visibleIds.length > 0 : expandedPhases.has(ph.key);
+    phaseEl.className = "phase" + (phaseExpanded ? " open" : "");
 
     const head = document.createElement("div");
     head.className = "phase-head";
@@ -772,7 +812,7 @@ function renderPhases(){
       <div class="chev">▾</div>
     `;
     const body = document.createElement("div");
-    body.className = "phase-body";
+    body.className = "phase-body" + (phaseExpanded ? "" : " collapsed");
 
     if(visibleIds.length === 0){
       body.innerHTML = `<div class="empty-msg">لا توجد بنود مطابقة للفلتر الحالي</div>`;
@@ -825,8 +865,11 @@ function renderPhases(){
     body.appendChild(saleSection);
 
     head.addEventListener("click", () => {
-      phaseEl.classList.toggle("open");
-      body.classList.toggle("collapsed");
+      const willExpand = body.classList.contains("collapsed");
+      body.classList.toggle("collapsed", !willExpand);
+      phaseEl.classList.toggle("open", willExpand);
+      if(willExpand) expandedPhases.add(ph.key);
+      else expandedPhases.delete(ph.key);
     });
 
     phaseEl.appendChild(head);
@@ -1064,6 +1107,10 @@ document.getElementById("filters").addEventListener("click", (e)=>{
   if(!btn) return;
   currentFilter = btn.dataset.f;
   document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active", b===btn));
+  renderPhases();
+});
+document.getElementById("itemSearch").addEventListener("input", e=>{
+  currentSearch = e.target.value || "";
   renderPhases();
 });
 
