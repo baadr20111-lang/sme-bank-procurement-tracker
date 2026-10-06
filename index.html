@@ -704,6 +704,7 @@ let currentSearch = "";
 let expandedPhases = new Set();
 let saveTimer = null;
 let saveTimerSale = null;
+let saleSaveInFlight = false;
 let saveInFlight = false;
 const pendingSaveVersions = new Map();
 let saveVersion = 0;
@@ -942,8 +943,10 @@ function queueSaveSale(phaseKey, amount){
 }
 
 async function flushQueuedSales(){
+  if(saleSaveInFlight){ saveTimerSale = setTimeout(flushQueuedSales, 150); return; }
   const batch = new Map(pendingSaleVersions);
   if(!batch.size) return;
+  saleSaveInFlight = true;
   try{
     for(const [phaseKey, entry] of batch){
       await apiPutSale(phaseKey, entry.amount);
@@ -956,6 +959,8 @@ async function flushQueuedSales(){
     console.error("save sale failed", e);
     setStatus("فشل حفظ البيع — ستتم إعادة المحاولة", "#FFB4A2");
     saveTimerSale = setTimeout(flushQueuedSales, 1500);
+  }finally{
+    saleSaveInFlight = false;
   }
 }
 
@@ -979,18 +984,20 @@ function setItemMeta(id, patch){
   queueSave([id]);
 }
 
+function roundMoney(value){ return Math.round((Number(value) + Number.EPSILON) * 100) / 100; }
+
 function calcItem(id){
   const m = getItemMeta(id);
   const s = getItemState(id);
-  const line = Number(m.total_qty) * Number(m.unit_price);
+  const line = roundMoney(Number(m.total_qty) * Number(m.unit_price));
   const isExempt = !!m.tax_included;
-  const lineTax = isExempt ? 0 : (line * TAX_RATE);
-  const lineWithTax = line + lineTax;
+  const lineTax = isExempt ? 0 : roundMoney(line * TAX_RATE);
+  const lineWithTax = roundMoney(line + lineTax);
   const completed = Math.min(Number(m.total_qty), Math.max(0, Number(s.completedQty || 0)));
   const pct = m.total_qty > 0 ? (completed / m.total_qty) : 0;
-  const spentWithout = line * pct;
-  const spentTax = lineTax * pct;
-  const spentWith = lineWithTax * pct;
+  const spentWithout = roundMoney(line * pct);
+  const spentTax = roundMoney(lineTax * pct);
+  const spentWith = roundMoney(spentWithout + spentTax);
   return {
     total_qty: Number(m.total_qty),
     unit_price: Number(m.unit_price),
@@ -1001,7 +1008,7 @@ function calcItem(id){
     spent_without_tax: spentWithout,
     spent_tax: spentTax,
     spent_with_tax: spentWith,
-    remaining_with_tax: lineWithTax - spentWith,
+    remaining_with_tax: roundMoney(lineWithTax - spentWith),
     completed,
     pct,
     done: completed >= Number(m.total_qty) && Number(m.total_qty) > 0
