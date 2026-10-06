@@ -484,6 +484,15 @@
     .project-kpi{padding:9px;min-height:72px}
     .dashboard-section-head{flex-wrap:wrap}
   }
+  /* Force Latin digits while preserving Arabic text and RTL layout */
+  input[type="number"],.fs-card .fs-amount,.fs-card .fs-pct,.overall-text .big,.ring .pct,
+  .project-kpi-value,.phase-num,.phase-progress-wrap .count,.phase-totals .num,.profit-info .amount,
+  .profit-info .pct-pill,.item-total,.item-total-tax,.item-spent-info,.sale-input,.item-controls input{
+    font-family:Arial,"Segoe UI",sans-serif!important;
+    font-variant-numeric:lining-nums tabular-nums;
+    font-feature-settings:"lnum" 1,"tnum" 1;
+  }
+  input[type="number"]{direction:ltr;text-align:left;unicode-bidi:isolate}
 </style>
 </head>
 <body>
@@ -554,11 +563,11 @@
     <div class="row2">
       <div>
         <label>الكمية</label>
-        <input type="number" id="newQty" value="1" min="0" step="1">
+        <input type="number" lang="en" id="newQty" value="1" min="0" step="1">
       </div>
       <div>
         <label>سعر الوحدة (ريال)</label>
-        <input type="number" id="newPrice" value="0" min="0" step="0.01">
+        <input type="number" lang="en" id="newPrice" value="0" min="0" step="0.01">
       </div>
     </div>
 
@@ -1109,7 +1118,7 @@ function renderPhases(){
     saleSection.innerHTML = `
       <div class="sale-field">
         <label>💵 قيمة البيع:</label>
-        <input type="number" class="sale-input" min="0" step="0.01" value="${sale || ''}" placeholder="0">
+        <input type="number" lang="en" class="sale-input" min="0" step="0.01" value="${sale || ''}" placeholder="0">
         <span style="font-size:13px;color:var(--text-dim);">ريال</span>
       </div>
       <div class="profit-info ${profitClass}">
@@ -1254,7 +1263,7 @@ function renderItemRow(id){
   controls.className = "item-controls";
 
   const qtyLabel = document.createElement("label");
-  qtyLabel.innerHTML = `الكمية <input type="number" min="0" step="1" value="${m.total_qty}">`;
+  qtyLabel.innerHTML = `الكمية <input type="number" lang="en" min="0" step="1" value="${m.total_qty}">`;
   const qtyInput = qtyLabel.querySelector("input");
   qtyInput.addEventListener("change", () => {
     const v = Math.max(0, Number(qtyInput.value) || 0);
@@ -1264,7 +1273,7 @@ function renderItemRow(id){
   controls.appendChild(qtyLabel);
 
   const priceLabel = document.createElement("label");
-  priceLabel.innerHTML = `سعر الوحدة <input type="number" min="0" step="0.01" value="${m.unit_price}">`;
+  priceLabel.innerHTML = `سعر الوحدة <input type="number" lang="en" min="0" step="0.01" value="${m.unit_price}">`;
   const priceInput = priceLabel.querySelector("input");
   priceInput.addEventListener("change", () => {
     const v = Math.max(0, Number(priceInput.value) || 0);
