@@ -186,11 +186,6 @@
   .item-spent-info{font-size:11px;color:#1D8E7B;direction:ltr;text-align:left;
     font-family:'Segoe UI',sans-serif;font-variant-numeric:lining-nums tabular-nums;font-weight:600;}
   .item-actions{display:flex;gap:6px;align-items:center;}
-  .assignee-sel{font-family:inherit;font-size:11.5px;border-radius:6px;padding:4px 6px;
-    border:1px solid var(--line);background:#F6F3EE;color:var(--text);cursor:pointer;}
-  .assignee-sel.set-بدر{background:#E7F0FF;border-color:#B7CFFA;}
-  .assignee-sel.set-ريان{background:#FDEBD8;border-color:#F6CBA0;}
-  .assignee-sel.set-سليمان{background:#E4F7EE;border-color:#A9E3C4;}
   .del-btn{background:transparent;border:1px solid #F1C0C0;color:#D64545;border-radius:6px;
     width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1;padding:0;font-family:inherit;}
   .del-btn:hover{background:#FDEAEA;}
@@ -255,13 +250,6 @@
       <div class="team-select">
         <button id="refreshBtn" title="تحديث" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
         <span id="saveStatus">جاري الاتصال...</span>
-        أنا:
-        <select id="whoAmI">
-          <option value="">اختر اسمك</option>
-          <option value="بدر">بدر</option>
-          <option value="ريان">ريان</option>
-          <option value="سليمان">سليمان</option>
-        </select>
       </div>
     </div>
 
@@ -287,12 +275,10 @@
 <div class="wrap">
   <div class="filters" id="filters">
     <label class="search-box"><span aria-hidden="true">⌕</span><input id="itemSearch" type="search" aria-label="ابحث في بنود المشروع" placeholder="ابحث باسم البند أو الوصف"></label>
-    <button class="filter-btn active" data-f="الكل">الكل</button>
-    <button class="filter-btn" data-f="بدر">بدر</button>
-    <button class="filter-btn" data-f="ريان">ريان</button>
-    <button class="filter-btn" data-f="سليمان">سليمان</button>
-    <button class="filter-btn" data-f="غير محدد">غير محدد</button>
-    <button class="filter-btn" data-f="متبقي" style="margin-right:auto;">المتبقي فقط</button>
+    <button class="filter-btn active" data-f="الكل">كل البنود</button>
+    <button class="filter-btn" data-f="غير مكتمل">غير مكتمل</button>
+    <button class="filter-btn" data-f="مكتمل جزئيًا">مكتمل جزئيًا</button>
+    <button class="filter-btn" data-f="مكتمل">مكتمل</button>
   </div>
   <div id="phases"></div>
 </div>
@@ -749,18 +735,18 @@ function renderProgress(){
 }
 
 function itemPassesFilter(id){
-  const s = getItemState(id);
   const m = getItemMeta(id);
   const c = calcItem(id);
   if(currentSearch){
     const query = currentSearch.trim().toLocaleLowerCase("ar");
-    const searchable = [m.name, m.description, m.unit, s.assignee].join(" ").toLocaleLowerCase("ar");
+    const searchable = [m.name, m.description, m.unit].join(" ").toLocaleLowerCase("ar");
     if(!searchable.includes(query)) return false;
   }
   if(currentFilter === "الكل") return true;
-  if(currentFilter === "متبقي") return !c.done;
-  if(currentFilter === "غير محدد") return !s.assignee;
-  return s.assignee === currentFilter;
+  if(currentFilter === "مكتمل") return c.done;
+  if(currentFilter === "مكتمل جزئيًا") return c.completed > 0 && !c.done;
+  if(currentFilter === "غير مكتمل") return c.completed === 0;
+  return true;
 }
 
 function renderPhases(){
@@ -879,7 +865,6 @@ function renderPhases(){
 }
 
 function renderItemRow(id){
-  const s = getItemState(id);
   const m = getItemMeta(id);
   const c = calcItem(id);
   const row = document.createElement("div");
@@ -896,13 +881,6 @@ function renderItemRow(id){
     <div class="item-actions"></div>
   `;
   const actionsEl = right.querySelector(".item-actions");
-
-  const assignSel = document.createElement("select");
-  assignSel.className = "assignee-sel " + (s.assignee ? "set-" + s.assignee : "");
-  assignSel.innerHTML = `<option value="">غير محدد</option><option value="بدر">بدر</option><option value="ريان">ريان</option><option value="سليمان">سليمان</option>`;
-  assignSel.value = s.assignee || "";
-  assignSel.addEventListener("change", () => setItemState(id, {assignee: assignSel.value}));
-  actionsEl.appendChild(assignSel);
 
   const delBtn = document.createElement("button");
   delBtn.className = "del-btn";
@@ -941,10 +919,7 @@ function renderItemRow(id){
         return;
       }
     }
-    let assignee = s.assignee;
-    const who = document.getElementById("whoAmI").value;
-    if(qty > 0 && !assignee && who) assignee = who;
-    setItemState(id, {done: qty >= c.total_qty && c.total_qty > 0, completedQty: qty, assignee});
+    setItemState(id, {done: qty >= c.total_qty && c.total_qty > 0, completedQty: qty});
     render();
   });
   statusWrap.appendChild(statusSel);
@@ -1114,15 +1089,9 @@ document.getElementById("itemSearch").addEventListener("input", e=>{
   renderPhases();
 });
 
-document.getElementById("whoAmI").addEventListener("change", (e)=>{
-  localStorage.setItem("sme-tracker-who", e.target.value);
-});
-
 document.getElementById("refreshBtn").addEventListener("click", ()=>loadState());
 
 (async function(){
-  const who = localStorage.getItem("sme-tracker-who");
-  if(who) document.getElementById("whoAmI").value = who;
   render();
   try{
     await loadState();
