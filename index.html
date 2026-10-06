@@ -428,6 +428,9 @@
     .status-select{min-height:40px;padding:8px;font-size:12px}
   }
 
+
+  .project-kpi-note{margin-top:3px;font-size:10.5px;color:#c6d0e2}
+  .financial-details[open]>summary span:last-child{font-size:11px!important}
 </style>
 </head>
 <body>
@@ -462,7 +465,7 @@
       </div>
     </div>
     <section class="project-kpis" id="projectKpis" aria-label="ملخص البنود"></section>
-    <details class="financial-details">
+    <details class="financial-details" open>
       <summary><span>تفاصيل الميزانية والأرباح</span><span style="font-weight:400;color:#B9C2D6;">عرض عند الحاجة</span></summary>
       <div class="financial-summary" id="financialSummary"></div>
     </details>
@@ -851,6 +854,28 @@ function calcPhaseCosts(phaseKey){
     costTax += c.line_tax;
   });
   return { costWith, costWithout, costTax };
+}
+
+function renderProjectKpis(){
+  const ids = allIds();
+  let complete = 0, partial = 0;
+  ids.forEach(id => {
+    const item = calcItem(id);
+    if(item.done) complete++;
+    else if(item.completed > 0) partial++;
+  });
+  const remaining = Math.max(0, ids.length - complete);
+  const host = document.getElementById("projectKpis");
+  if(!host) return;
+  const metrics = [
+    ["إجمالي البنود", ids.length, "كل مراحل المشروع"],
+    ["مكتمل", complete, "بند منجز بالكامل"],
+    ["مكتمل جزئياً", partial, "يحتاج استكمال"],
+    ["متبقي", remaining, "بند لم يكتمل بعد"]
+  ];
+  host.innerHTML = metrics.map(([label, value, note], index) =>
+    '<article class="project-kpi" data-tone="'+(index===1?"green":index===2?"amber":"")+'"><div class="project-kpi-label">'+label+'</div><div class="project-kpi-value">'+value+'</div><div class="project-kpi-note">'+note+'</div></article>'
+  ).join("");
 }
 
 function render(){
