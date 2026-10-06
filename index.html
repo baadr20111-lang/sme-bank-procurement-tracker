@@ -315,6 +315,76 @@
     .phase-sale{gap:10px;padding:11px 12px}
     .sale-input{width:105px;padding:7px 8px;font-size:12px}
   }
+
+  /* Project dashboard refinement */
+  :root{--bg:#f4f6fa;--line:#e3e8f0;--orange:#e87932;--orange-soft:#fff0e5;--teal:#168f7d}
+  body{background:radial-gradient(ellipse at 85% -8%,rgba(35,59,107,.09),transparent 34%),var(--bg)}
+  .wrap{max-width:1240px}
+  header.top{padding:26px 0 20px;background:radial-gradient(900px 360px at 100% 0%,#314c80 0%,transparent 68%),linear-gradient(145deg,#121e36,#1d2c4e 72%);box-shadow:0 12px 35px rgba(15,29,54,.15)}
+  .brand{align-items:center}
+  .brand h1{font-size:clamp(21px,3vw,28px);letter-spacing:-.3px}
+  .brand p{font-size:13px}
+  .team-select{gap:8px}
+  #exportCsvBtn,#refreshBtn{padding:9px 13px!important;border-radius:10px!important;font-weight:700!important}
+  #saveStatus{border-radius:999px;padding:7px 12px}
+  .overall{margin-top:2px}
+  .project-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+  .project-kpi{min-width:0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.1);color:#fff}
+  .project-kpi-label{font-size:11px;color:#c6d0e2}
+  .project-kpi-value{margin-top:4px;font-size:20px;line-height:1.2;font-weight:800;font-variant-numeric:tabular-nums}
+  .project-kpi-value small{font-size:11px;font-weight:600;color:#c6d0e2}
+  .project-kpi[data-tone="green"] .project-kpi-value{color:#85e2c4}
+  .project-kpi[data-tone="amber"] .project-kpi-value{color:#ffc18f}
+  .financial-details{margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
+  .financial-details>summary{padding:13px 16px}
+  .financial-summary{padding-top:0}
+  .filters{position:sticky;top:8px;z-index:20;backdrop-filter:blur(12px);background:rgba(255,255,255,.94);box-shadow:0 8px 28px rgba(24,38,62,.08);padding:12px;margin-bottom:18px}
+  .search-box{border-radius:11px;min-height:40px}
+  .phase{border-radius:18px;border-color:#e1e6ef;box-shadow:0 7px 22px rgba(25,39,64,.055)}
+  .phase-head{padding:17px 20px}
+  .phase-num{width:38px;height:38px;border-radius:12px}
+  .phase-title h2{font-size:17px}
+  .phase-title .sub{font-size:12px;margin-top:3px}
+  .phase-progress-wrap{width:clamp(90px,16vw,170px)}
+  .item{display:grid;grid-template-columns:minmax(120px,150px) minmax(180px,1fr) minmax(150px,190px);align-items:center;gap:14px;padding:14px 18px}
+  .status-control{width:100%;min-width:0}
+  .status-select{min-height:40px;border-radius:10px;padding-inline:12px}
+  .item-row1{min-width:0;width:100%}
+  .item-display-name{font-size:14px}
+  .item-display-desc{font-size:12px}
+  .item-editor{margin-top:5px}
+  .item-right{min-width:0;width:100%;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#f7f8fb;border:1px solid #edf0f5}
+  .item-total{font-size:15px}
+  .item-actions{align-self:flex-end}
+  .del-btn{width:30px;height:30px}
+  .phase-totals{gap:10px 20px;background:#f7f9fc}
+  .phase-sale{background:linear-gradient(110deg,#f6f3ff,#f3f8ff)}
+  .add-item-btn{width:calc(100% - 36px);border-color:#d7deea;color:#45516a;background:#fafbfc}
+  .add-item-btn:hover{background:#fff6ef}
+  @media(max-width:720px){
+    .project-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .project-kpi{padding:10px 11px}
+    .project-kpi-value{font-size:18px}
+    .item{grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+    .item-row1{grid-column:1/-1;grid-row:1}
+    .status-control{grid-column:1;grid-row:2}
+    .item-right{grid-column:2;grid-row:2}
+    .item-total-tax{font-size:10px}
+    .phase-head{gap:9px;padding:13px}
+    .phase-progress-wrap{width:78px}
+    .phase-title h2{font-size:14px}
+    .phase-title .sub{font-size:10px}
+    .filters{top:4px;gap:6px;padding:9px}
+    .search-box{flex-basis:100%;min-width:100%}
+    .filter-btn{flex:1;padding:8px 7px;font-size:11px}
+  }
+  @media(max-width:390px){
+    .item{grid-template-columns:1fr}
+    .item-row1,.status-control,.item-right{grid-column:1;grid-row:auto}
+    .item-right{align-items:flex-start}
+    .team-select{width:100%}
+  }
+
 </style>
 </head>
 <body>
@@ -348,6 +418,7 @@
         <div class="small">عبر المراحل الثلاث</div>
       </div>
     </div>
+    <section class="project-kpis" id="projectKpis" aria-label="ملخص البنود"></section>
     <details class="financial-details">
       <summary><span>تفاصيل الميزانية والأرباح</span><span style="font-weight:400;color:#B9C2D6;">عرض عند الحاجة</span></summary>
       <div class="financial-summary" id="financialSummary"></div>
@@ -740,6 +811,7 @@ function calcPhaseCosts(phaseKey){
 }
 
 function render(){
+  renderProjectKpis();
   renderFinancialSummary();
   renderProgress();
   renderPhases();
