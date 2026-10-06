@@ -29,9 +29,15 @@
   #saveStatus{font-size:12px;min-width:120px;text-align:center;padding:5px 10px;border-radius:6px;
     background:#1a2846;transition:all .2s;}
 
+  .financial-details{background:#1D2C4E;border-radius:14px;margin-bottom:12px;overflow:hidden;}
+  .financial-details>summary{list-style:none;cursor:pointer;padding:12px 16px;color:#fff;
+    font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+  .financial-details>summary::-webkit-details-marker{display:none;}
+  .financial-details>summary::after{content:"＋";color:#FFB06A;font-size:16px;}
+  .financial-details[open]>summary::after{content:"−";}
   .financial-summary{
     display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
-    gap:12px;background:#1D2C4E;border-radius:14px;padding:16px 18px;
+    gap:12px;padding:0 14px 14px;
   }
   .fs-card{background:#243A66;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;}
   .fs-card.spent{background:linear-gradient(135deg,#2BB5A0,#1D8E7B);}
@@ -158,6 +164,12 @@
   .item-desc-input::placeholder{color:#BBB5AC;}
 
   .item-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 6px;}
+  .item-editor{width:100%;margin-top:2px;border-top:1px solid #F1EDE5;padding-top:6px;}
+  .item-editor>summary{cursor:pointer;color:var(--text-dim);font-size:11.5px;font-weight:600;
+    width:max-content;padding:2px 0;}
+  .item-editor[open]>summary{color:var(--orange);margin-bottom:6px;}
+  .item-editor .item-name-input,.item-editor .item-desc-input{display:block;}
+  .item-editor .item-controls{padding-inline:0;}
   .item-controls label{font-size:11.5px;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;}
   .item-controls input{width:85px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;
     font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;text-align:center;
@@ -253,8 +265,6 @@
       </div>
     </div>
 
-    <div class="financial-summary" id="financialSummary"></div>
-
     <div class="overall">
       <div class="ring">
         <svg width="64" height="64" viewBox="0 0 64 64">
@@ -269,6 +279,10 @@
         <div class="small">عبر المراحل الثلاث</div>
       </div>
     </div>
+    <details class="financial-details">
+      <summary><span>تفاصيل الميزانية والأرباح</span><span style="font-weight:400;color:#B9C2D6;">عرض عند الحاجة</span></summary>
+      <div class="financial-summary" id="financialSummary"></div>
+    </details>
   </div>
 </header>
 
@@ -335,7 +349,7 @@ let itemsMeta = {};
 let phasesSale = { p1:0, p2:0, p3:0 };
 let currentFilter = "الكل";
 let currentSearch = "";
-let expandedPhases = new Set(["p2"]);
+let expandedPhases = new Set();
 let saveTimer = null;
 let saveTimerSale = null;
 let saveInFlight = false;
@@ -933,8 +947,6 @@ function renderItemRow(id){
   nameInput.value = m.name;
   nameInput.placeholder = "اسم البند";
   nameInput.addEventListener("change", () => { setItemMeta(id, {name: nameInput.value}); });
-  mid.appendChild(nameInput);
-
   const descInput = document.createElement("textarea");
   descInput.className = "item-desc-input";
   descInput.value = m.description;
@@ -947,7 +959,6 @@ function renderItemRow(id){
   descInput.addEventListener("change", () => {
     setItemMeta(id, {description: descInput.value});
   });
-  mid.appendChild(descInput);
   setTimeout(()=>{
     descInput.style.height = "auto";
     descInput.style.height = descInput.scrollHeight + "px";
@@ -985,7 +996,12 @@ function renderItemRow(id){
   });
   controls.appendChild(taxBtn);
 
-  mid.appendChild(controls);
+  const editor = document.createElement("details");
+  editor.className = "item-editor";
+  const editorSummary = document.createElement("summary");
+  editorSummary.textContent = "تعديل تفاصيل البند";
+  editor.append(editorSummary, nameInput, descInput, controls);
+  mid.appendChild(editor);
 
   row.appendChild(statusWrap);
   row.appendChild(mid);
