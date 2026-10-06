@@ -385,6 +385,49 @@
     .team-select{width:100%}
   }
 
+
+  /* Procurement item cards: compact, scannable, and consistent at tablet widths */
+  .item{
+    position:relative;grid-template-columns:150px minmax(0,1fr) minmax(190px,235px);
+    align-items:center;gap:16px;padding:16px 18px;background:#fff;
+    border-bottom:1px solid #edf0f4;transition:background .18s ease;
+  }
+  .item:hover{background:#fbfcfe}
+  .item.done{background:linear-gradient(90deg,#fff 0%,#f3fbf7 100%)}
+  .item.partial{background:linear-gradient(90deg,#fff 0%,#fffaf2 100%)}
+  .item-row1{grid-column:2;grid-row:1;min-width:0;gap:5px}
+  .item-display-name{font-size:15px;line-height:1.45;color:#18243a}
+  .item-display-desc{max-width:60ch;font-size:12px;line-height:1.55;color:#7a8495}
+  .item-editor{margin-top:3px;border-top:0;padding-top:0}
+  .item-editor>summary{display:inline-flex;align-items:center;gap:6px;border-radius:7px;padding:4px 8px;color:#66738a;background:#f5f7fa;font-size:11px}
+  .item-editor>summary:hover,.item-editor[open]>summary{background:#fff1e7;color:#bd5c1c}
+  .status-control{grid-column:1;grid-row:1;align-self:center;width:100%}
+  .status-select{min-height:42px;padding-inline:12px;font-weight:700}
+  .item-right{grid-column:3;grid-row:1;width:100%;min-width:0;position:relative;align-items:flex-start;gap:5px;padding:11px 13px;padding-left:48px;border:1px solid #e8edf3;border-radius:13px;background:#f7f9fc}
+  .item-total{font-size:16px;font-weight:800;color:#16233f}
+  .item-total-tax{font-size:11px;line-height:1.45;color:#7b8494}
+  .item-spent-info{font-size:11px;line-height:1.45;color:#147b68}
+  .item-actions{position:absolute;left:9px;bottom:9px}
+  .del-btn{height:30px;width:30px;border-radius:9px;background:#fff;border-color:#f0d6d6}
+  .del-btn:hover{background:#fff0f0}
+  .item.done .status-select{box-shadow:inset 0 0 0 1px rgba(22,143,125,.05)}
+  @media(max-width:800px){
+    .item{grid-template-columns:minmax(125px,.9fr) minmax(0,1.1fr);gap:10px;padding:13px}
+    .item-row1{grid-column:1/-1;grid-row:1}
+    .status-control{grid-column:1;grid-row:2}
+    .item-right{grid-column:2;grid-row:2}
+  }
+  @media(max-width:440px){
+    .item{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:11px}
+    .item-display-name{font-size:14px}
+    .item-right{padding:9px 10px;padding-left:40px;border-radius:11px}
+    .item-total{font-size:14px}
+    .item-total-tax,.item-spent-info{font-size:10px}
+    .item-actions{left:6px;bottom:6px}
+    .del-btn{width:27px;height:27px}
+    .status-select{min-height:40px;padding:8px;font-size:12px}
+  }
+
 </style>
 </head>
 <body>
