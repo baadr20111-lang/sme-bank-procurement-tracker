@@ -747,7 +747,7 @@ async function sbFetch(path, options = {}){
 }
 
 async function apiGet(){
-  const data = await sbFetch("procurement_items?select=*");
+  const data = await procurementFetchAll("procurement_items?select=*&order=id.asc");
   const items = {};
   const meta = {};
   (data || []).forEach(row => {
@@ -767,14 +767,20 @@ async function apiGet(){
 }
 
 async function apiGetPhases(){
-  try{
-    const data = await sbFetch("procurement_phases?select=*");
+    const data = await procurementFetchAll("procurement_phases?select=*&order=phase_key.asc");
     const phases = { p1:0, p2:0, p3:0 };
     (data || []).forEach(row => { phases[row.phase_key] = Number(row.sale_amount) || 0; });
     return phases;
-  }catch(e){
-    console.warn("phases table not ready", e);
-    return { p1:0, p2:0, p3:0 };
+}
+
+async function procurementFetchAll(path){
+  const rows=[];
+  for(let offset=0;;){
+    const batch=await sbFetch(path+'&limit=500&offset='+offset);
+    if(!Array.isArray(batch)) throw new Error('استجابة المشتريات غير مكتملة');
+    if(!batch.length) return rows;
+    rows.push(...batch);
+    offset+=batch.length;
   }
 }
 
@@ -893,8 +899,13 @@ async function loadState(){
     const remote = await apiGet();
     state = { items: remote.items };
     itemsMeta = remote.meta;
-    phasesSale = await apiGetPhases();
-    if(!realtimeConnected) setStatus("متصل ✓", "#8DE0C8");
+    try{
+      phasesSale = await apiGetPhases();
+      setStatus("متصل ✓", "#8DE0C8");
+    }catch(error){
+      console.warn('phase budgets unavailable; previous values retained',error);
+      setStatus("تحديث جزئي — تعذر تحديث ميزانيات المراحل", "#FFB4A2");
+    }
   }catch(e){
     console.log("remote load failed", e);
     setStatus("غير متصل", "#FFB4A2");
