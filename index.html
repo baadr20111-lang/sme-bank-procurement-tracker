@@ -862,6 +862,7 @@ function subscribeRealtime(){
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'procurement_phases' },
       (payload) => {
+        if(saleSaveInFlight || pendingSaleVersions.size) return;
         if(!payload.new || !payload.new.phase_key) return;
         phasesSale[payload.new.phase_key] = Number(payload.new.sale_amount) || 0;
         render();
@@ -881,19 +882,13 @@ function subscribeRealtime(){
     });
 
   setInterval(async () => {
-    if(realtimeConnected || dirtyLocal || saveInFlight) return;
-    try{
-      const remote = await apiGet();
-      state = { items: remote.items };
-      itemsMeta = remote.meta;
-      phasesSale = await apiGetPhases();
-      render();
-    }catch(e){ console.warn("fallback sync failed", e); }
+    if(realtimeConnected) return;
+    await loadState();
   }, 30000);
 }
 
 async function loadState(){
-  if(dirtyLocal || saveInFlight) return;
+  if(dirtyLocal || saveInFlight || saleSaveInFlight || pendingSaleVersions.size) return;
   try{
     setStatus("جاري التحديث...", "#CDD5E6", true);
     const remote = await apiGet();
