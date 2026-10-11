@@ -856,6 +856,23 @@ html[data-theme="dark"] .overview-badge{background:#193e32;color:#9cd5b5!importa
 @media(max-width:850px){.overview-kpis{grid-template-columns:repeat(2,1fr);}.overview-columns{grid-template-columns:1fr;}}
 @media(max-width:480px){.overview-kpis article,.overview-card{padding:16px;}.overview-kpis strong{font-size:24px;}.overview-heading{flex-wrap:wrap;}}
 @media print{#procOverview{display:none!important;}}
+
+.app-sidebar button.nav-active{background:#ff7704;color:#fff;}
+body[data-view="overview"] .app-sidebar button:first-of-type{background:#ff7704;color:#fff;}
+.overview-scope{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.overview-scope label{font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:6px;}
+.overview-scope select{border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);padding:9px 12px;font:inherit;min-width:180px;}
+.metric-action{cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.metric-action:hover{transform:translateY(-3px);box-shadow:0 8px 20px #14243c15;}
+.metric-action:focus-visible{outline:3px solid #ff7704;outline-offset:3px;}
+.scoped-finance{margin-bottom:18px;border-right:3px solid #ff7704;}
+.scoped-finance>div{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.scoped-finance span{font-size:12px;color:var(--text-dim);}
+.scoped-finance b{display:block;font-size:21px;color:var(--text);margin-top:9px;}
+.dashboard-quality{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:#fff7ea;border:1px solid #ebdcc4;border-radius:10px;font-size:11px;color:#6d5733;}
+html[data-theme="dark"] .dashboard-quality{background:#302a22;border-color:#564b35;color:#dfc9a4;}
+@media(max-width:850px){.scoped-finance>div{grid-template-columns:repeat(2,1fr);}}
+.drill-phase-head{display:flex!important;padding:12px 20px!important;background:var(--bg)!important;color:var(--text)!important;}.drill-phase-head h2{font-size:15px!important;color:var(--text)!important;}.drill-phase-head .phase-progress-wrap,.drill-phase-head .chev{display:none!important;}
 </style>
 </head>
 <body>
@@ -1327,6 +1344,7 @@ let procView="overview",procReportScope="p2";
 document.body.dataset.view="overview";
 function setProcView(view){
  procView=view;document.body.dataset.view=view;
+ document.querySelectorAll(".app-sidebar button").forEach(b=>b.classList.toggle("nav-active",b.getAttribute("onclick")?.includes("'"+view+"'")));
  document.getElementById("procOverview").hidden=view!=="overview";
  if(view==="overview")renderProcOverview();
  document.getElementById("procReports").hidden=view!=="reports";
@@ -1344,6 +1362,13 @@ function procReportData(){
  return {ids,cost,tax,sale,budget,profit:roundMoney(sale-cost)};
 }
 
+let overviewScope="all",workspaceAllPhases=false;
+function setOverviewScope(value){overviewScope=value;renderProcOverview();}
+function openOverviewItems(filter){
+ const key=overviewScope==="all"?selectedDashboardPhase:overviewScope;
+ selectDashboardPhase(key);workspaceAllPhases=overviewScope==="all";currentFilter=filter;setProcView("workspace");render();
+ document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.f===filter));
+}
 function renderProcOverview(){
  const phases=PHASE_ORDER.map(p=>{
   const ids=allIds().filter(id=>getItemMeta(id).phase===p.key);
@@ -1351,17 +1376,27 @@ function renderProcOverview(){
   const qty=ids.reduce((n,id)=>n+calcItem(id).total_qty,0),doneQty=ids.reduce((n,id)=>n+calcItem(id).completed,0);
   return {...p,ids,cost,pct:qty?Math.round(doneQty/qty*100):0,sale:Number(phasesSale[p.key])||0,budget:APPROVED_BUDGET[p.key]};
  });
- const total=roundMoney(phases.reduce((n,p)=>n+p.cost,0)),all=allIds(),done=all.filter(id=>calcItem(id).done).length;
+ const shown=overviewScope==="all"?phases:phases.filter(p=>p.key===overviewScope);
+ const total=roundMoney(shown.reduce((n,p)=>n+p.cost,0)),all=shown.flatMap(p=>p.ids),done=all.filter(id=>calcItem(id).done).length;
+ const partial=all.filter(id=>!calcItem(id).done&&calcItem(id).completed>0).length;
+ const missingCosts=all.filter(id=>calcItem(id).line_without_tax===0).length;
+ const selected=shown.length===1?shown[0]:null;
  const top=[...all].sort((a,b)=>calcItem(b).line_without_tax-calcItem(a).line_without_tax).slice(0,5);
  const max=top.length?calcItem(top[0]).line_without_tax:1;
  document.getElementById("procOverview").innerHTML=`
- <div class="overview-heading"><div><span>لوحة قيادة المشروع</span><h2>نظرة عامة</h2><p>التكاليف والإنجاز والمراحل في مكان واحد</p></div><span class="overview-badge">${done} من ${all.length} بند مكتمل</span></div>
- <div class="overview-kpis"><article><small>تكلفة المشروع المسجلة</small><strong>${fmt(total)}</strong><span>ريال · بدون الضريبة</span></article><article><small>المراحل</small><strong>${phases.length}</strong><span>نطاق المشروع الحالي</span></article><article><small>البنود المكتملة</small><strong>${done}</strong><span>من ${all.length} بند</span></article><article><small>تحتاج استكمال</small><strong>${all.length-done}</strong><span>يشمل الجزئي وغير المكتمل</span></article></div>
+ <div class="overview-heading"><div><span>لوحة قيادة المشروع</span><h2>نظرة عامة</h2><p>التكاليف والإنجاز والمراحل في مكان واحد</p></div><div class="overview-scope"><label>نطاق الداش بورد <select aria-label="نطاق الداش بورد" onchange="setOverviewScope(this.value)"><option value="all" ${overviewScope==='all'?'selected':''}>المشروع كامل</option>${PHASE_ORDER.map(p=>`<option value="${p.key}" ${overviewScope===p.key?'selected':''}>${escapeHtml(p.title)}</option>`).join('')}</select></label><span class="overview-badge">${done} من ${all.length} بند مكتمل</span></div></div>
+ <div class="overview-kpis"><article><small>تكلفة المشروع المسجلة</small><strong>${fmt(total)}</strong><span>ريال · بدون الضريبة</span></article><article><small>المراحل</small><strong>${shown.length}</strong><span>نطاق المشروع الحالي</span></article><article class="metric-action" role="button" tabindex="0" data-open-filter="مكتمل"><small>البنود المكتملة ↗</small><strong>${done}</strong><span>من ${all.length} بند</span></article><article class="metric-action" role="button" tabindex="0" data-open-filter="غير مكتمل بالكامل"><small>غير مكتملة بالكامل ↗</small><strong>${all.length-done}</strong><span>${partial} جزئي · ${all.length-done-partial} لم يبدأ</span></article></div>
+ ${selected?`<section class="overview-card scoped-finance"><h3>الأداء المالي · ${escapeHtml(selected.title)}</h3><div><span>الميزانية <b>${Number.isFinite(selected.budget)?fmt(selected.budget):'غير محددة'}</b></span><span>الوفر <b>${Number.isFinite(selected.budget)?fmt(roundMoney(selected.budget-selected.cost)):'—'}</b></span><span>قيمة البيع <b>${selected.sale?fmt(selected.sale):'غير محددة'}</b></span><span>الربح <b>${selected.sale?fmt(roundMoney(selected.sale-selected.cost)):'—'}</b></span><span>هامش الربح <b>${selected.sale?((selected.sale-selected.cost)/selected.sale*100).toFixed(2)+'%':'—'}</b></span></div></section>`:''}
+ <div class="dashboard-quality"><span>جودة البيانات</span><b>${missingCosts} بند بلا تكلفة مسجلة</b><span>لا تُحتسب المبالغ المفقودة كتقدير معتمد.</span></div>
  <div class="overview-columns"><section class="overview-card"><h3>مقارنة المراحل</h3>${phases.map(p=>`<button class="phase-overview-row" data-open-phase="${p.key}"><div><b>${escapeHtml(p.title)}</b><small>${escapeHtml(p.sub)}</small><span>${fmt(p.cost)} ريال</span></div><div class="phase-overview-progress"><b>${p.pct}%</b><i><em style="width:${p.pct}%"></em></i></div><span>←</span></button>`).join('')}</section>
- <section class="overview-card"><h3>توزيع تكلفة المشروع</h3>${phases.map((p,i)=>`<div class="distribution-row"><div><span>${escapeHtml(p.title)}</span><b>${total?(p.cost/total*100).toFixed(1):0}%</b></div><i><em style="width:${total?p.cost/total*100:0}%;background:${['#ff7704','#5874a5','#2d9b89'][i]}"></em></i><small>${fmt(p.cost)} ريال</small></div>`).join('')}</section></div>
+ <section class="overview-card"><h3>توزيع تكلفة النطاق المختار</h3>${shown.map((p,i)=>`<div class="distribution-row"><div><span>${escapeHtml(p.title)}</span><b>${total?(p.cost/total*100).toFixed(1):0}%</b></div><i><em style="width:${total?p.cost/total*100:0}%;background:${['#ff7704','#5874a5','#2d9b89'][i]}"></em></i><small>${fmt(p.cost)} ريال</small></div>`).join('')}</section></div>
  <div class="overview-columns"><section class="overview-card"><h3>الميزانية والربح</h3>${phases.map(p=>`<div class="finance-overview-row"><b>${escapeHtml(p.title)}</b><span>الميزانية: ${Number.isFinite(p.budget)?fmt(p.budget):'غير محددة'}</span><span>الوفر: ${Number.isFinite(p.budget)?fmt(roundMoney(p.budget-p.cost)):'—'}</span><span>الربح: ${p.sale?fmt(roundMoney(p.sale-p.cost)):'غير محدد'} ${p.sale?'· '+((p.sale-p.cost)/p.sale*100).toFixed(2)+'%':''}</span></div>`).join('')}</section>
  <section class="overview-card"><h3>أعلى البنود تكلفة</h3>${top.map(id=>`<div class="distribution-row"><div><span>${escapeHtml(getItemMeta(id).name)}</span><b>${fmt(calcItem(id).line_without_tax)}</b></div><i><em style="width:${max?calcItem(id).line_without_tax/max*100:0}%"></em></i></div>`).join('')}</section></div>
  <section class="overview-card overview-alerts"><h3>ما يحتاج مراجعة</h3><p>${phases.filter(p=>!Number.isFinite(p.budget)).map(p=>escapeHtml(p.title)).join(' و ')}: الميزانية المعتمدة غير مسجلة.</p><p>${phases.filter(p=>!p.sale).map(p=>escapeHtml(p.title)).join(' و ')}: قيمة البيع غير مسجلة؛ لا يمكن تأكيد الربح.</p><p>بيانات السداد غير موثقة في سجل مستقل؛ لا تعتبر نسبة الإنجاز دليلًا على الدفع.</p></section>`;
+ document.querySelectorAll("[data-open-filter]").forEach(b=>{
+ const open=()=>openOverviewItems(b.dataset.openFilter);
+ b.onclick=open;b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}};
+ });
  document.querySelectorAll("[data-open-phase]").forEach(b=>b.onclick=()=>{selectDashboardPhase(b.dataset.openPhase);setProcView("workspace");});
 }
 
@@ -1442,7 +1477,7 @@ const APPROVED_BUDGET=Object.freeze({p2:84512.02});
 let selectedDashboardPhase="p2";
 function selectDashboardPhase(key){
  if(!PHASE_ORDER.some(p=>p.key===key))return;
- selectedDashboardPhase=key;currentSearch="";document.getElementById("itemSearch").value="";
+ workspaceAllPhases=false;selectedDashboardPhase=key;currentSearch="";document.getElementById("itemSearch").value="";
  expandedPhases.add(key);render();
 }
 function renderBudgetDashboard(){
@@ -1547,6 +1582,7 @@ function itemPassesFilter(id){
     const searchable = [m.name, m.description, m.unit].join(" ").toLocaleLowerCase("ar");
     if(!searchable.includes(query)) return false;
   }
+  if(currentFilter === "غير مكتمل بالكامل") return !c.done;
   if(currentFilter === "الكل") return true;
   if(currentFilter === "مكتمل") return c.done;
   if(currentFilter === "مكتمل جزئيًا") return c.completed > 0 && !c.done;
@@ -1559,7 +1595,7 @@ function renderPhases(){
   container.innerHTML = "";
 
   PHASE_ORDER.forEach((ph, idx) => {
-    if(ph.key!==selectedDashboardPhase)return;
+    if(!workspaceAllPhases&&ph.key!==selectedDashboardPhase)return;
     const phaseIds = allIds().filter(id => getItemMeta(id).phase === ph.key)
       .sort((a,b) => getItemMeta(a).sort_order - getItemMeta(b).sort_order);
 
@@ -1591,6 +1627,7 @@ function renderPhases(){
 
     const head = document.createElement("div");
     head.className = "phase-head";
+    if(workspaceAllPhases)head.classList.add("drill-phase-head");
     head.setAttribute("role", "button");
     head.setAttribute("tabindex", "0");
     head.setAttribute("aria-expanded", String(phaseExpanded));
