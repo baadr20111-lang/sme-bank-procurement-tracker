@@ -596,6 +596,39 @@
   .dashboard-section-head p{color:#aab5c7}
   .jump-phases{background:#202c40;border-color:#3b4a61;color:#e2e8f0}
   .jump-phases:hover{background:#382a21;border-color:#a96135;color:#ffc094}
+
+.wrap{max-width:1180px;}
+header.top{padding:24px 0 20px;border-radius:0 0 28px 28px;}
+header.top .wrap{gap:20px;}
+.brand h1{font-size:24px;}
+.overall{display:none;}
+.budget-dashboard{background:#fff;color:var(--text);border-radius:20px;padding:24px;box-shadow:0 12px 34px #080f2026;}
+.budget-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;}
+.budget-heading span{font-size:12px;color:#767a85;}
+.budget-heading h2{font-size:19px;margin:5px 0;}
+.budget-heading>b{background:#e3f6ef;color:#12775c;padding:8px 14px;border-radius:999px;white-space:nowrap;font-size:13px;}
+.budget-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.budget-grid article{background:#f5f6f9;border:1px solid #e9ecf2;padding:18px;border-radius:14px;display:flex;flex-direction:column;gap:8px;}
+.budget-grid article>span{font-size:13px;color:#596174;}
+.budget-grid strong{font-size:27px;direction:ltr;text-align:right;font-variant-numeric:tabular-nums;}
+.budget-grid small{font-size:11px;color:#6b7280;}
+.budget-grid .budget-saving{background:#edf9f3;border-color:#ceebde;color:#137851;}
+.budget-grid .budget-overrun{background:#fff0ef;color:#b93838;}
+.budget-foot{margin:16px 0 0;color:#7b8190;font-size:11px;}
+.financial-details{border:1px solid #ffffff26;border-radius:12px;}
+.phase{border-radius:16px;box-shadow:0 3px 16px #16233f06;margin-bottom:18px;}
+.phase-head{padding:20px;}
+.item{padding:18px 22px;gap:18px;}
+.item-display-name{font-size:15px;}
+.item-notes summary{font-size:12px;color:#677289;cursor:pointer;padding:4px 0;}
+.item-notes[open] .item-display-desc{padding:10px;background:#f5f6f9;border-radius:8px;max-width:650px;line-height:1.8;}
+.item-spent-info{display:none;}
+.phase-totals{gap:12px;font-size:12px;}
+.filters{position:sticky;top:0;z-index:10;background:var(--bg);padding-block:12px;}
+button:focus-visible,summary:focus-visible{outline:3px solid #ff7704;outline-offset:3px;}
+@media(max-width:800px){.budget-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.budget-grid strong{font-size:23px;}.budget-heading{align-items:flex-start;}.budget-heading h2{font-size:16px;}}
+@media(max-width:480px){.wrap{padding-inline:12px;}.budget-dashboard{padding:16px;}.budget-grid article{padding:12px;}.budget-grid strong{font-size:20px;}.item{padding:14px;}.budget-heading{flex-wrap:wrap;}}
+
 </style>
 </head>
 <body>
@@ -629,6 +662,7 @@
         <div class="small">نسبة البنود المكتملة بالكامل عبر المراحل الثلاث</div>
       </div>
     </div>
+    <section id="budgetDashboard" class="budget-dashboard" aria-label="ميزانية المرحلة الأولى"></section>
     <section class="project-kpis" id="projectKpis" aria-label="ملخص البنود"></section>
     <details class="financial-details">
       <summary><span>تفاصيل الميزانية والأرباح</span><span style="font-weight:400;color:#B9C2D6;">عرض عند الحاجة</span></summary>
@@ -1058,10 +1092,32 @@ function renderProjectKpis(){
 }
 
 function render(){
+  renderBudgetDashboard();
   renderProjectKpis();
   renderFinancialSummary();
   renderProgress();
   renderPhases();
+}
+
+
+const APPROVED_BUDGET = Object.freeze({p2:84512.02}); // Company-approved reference, excluding VAT; never writes to financial records.
+function renderBudgetDashboard(){
+  const ids=allIds().filter(id=>getItemMeta(id).phase==="p2");
+  if(!ids.length){document.getElementById("budgetDashboard").textContent="جاري تحميل ملخص المرحلة الأولى…";return;}
+  const cost=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_without_tax,0));
+  const budget=APPROVED_BUDGET.p2, savings=roundMoney(budget-cost);
+  const sale=Number(phasesSale.p2)||0, profit=roundMoney(sale-cost);
+  const qty=ids.reduce((n,id)=>n+calcItem(id).total_qty,0);
+  const completed=ids.reduce((n,id)=>n+calcItem(id).completed,0);
+  const pct=qty?Math.round(completed/qty*100):0;
+  document.getElementById("budgetDashboard").innerHTML=`
+    <div class="budget-heading"><div><span>المرحلة الأولى · بدون الضريبة</span><h2>تجهيزات مكتب الرئيس وغرفة الاجتماعات</h2></div><b>إنجاز ${pct}%</b></div>
+    <div class="budget-grid">
+      <article><span>الميزانية المعتمدة</span><strong>${fmt(budget)}</strong><small>ريال · اعتماد الشركة</small></article>
+      <article><span>التكلفة الحالية</span><strong>${fmt(cost)}</strong><small>ريال · من بنود المرحلة</small></article>
+      <article class="${savings>=0?'budget-saving':'budget-overrun'}"><span>${savings>=0?'الوفر عن الميزانية':'تجاوز الميزانية'}</span><strong>${fmt(Math.abs(savings))}</strong><small>${(Math.abs(savings)/budget*100).toFixed(2)}% من الميزانية</small></article>
+      <article><span>الربح بدون الضريبة</span><strong>${sale>0?fmt(profit):'—'}</strong><small>${sale>0?'البيع '+fmt(sale)+' − التكلفة':'لم تحدد قيمة البيع'}</small></article>
+    </div><p class="budget-foot">مرجع الميزانية: اعتماد الشركة 11 أكتوبر 2026. الإنجاز مستقل عن السداد؛ الربح ليس رصيدًا نقديًا.</p>`;
 }
 
 function renderFinancialSummary(){
@@ -1350,7 +1406,14 @@ function renderItemRow(id){
   displayDesc.className = "item-display-desc";
   displayDesc.textContent = m.description || "";
   displayDesc.hidden = !m.description;
-  if(m.description) mid.appendChild(displayDesc);
+  if(m.description){
+    const notes=document.createElement("details");
+    notes.className="item-notes";
+    const summary=document.createElement("summary");
+    summary.textContent="عرض الملاحظات والمستندات";
+    notes.append(summary,displayDesc);
+    mid.appendChild(notes);
+  }
 
   const nameInput = document.createElement("input");
   nameInput.className = "item-name-input";
