@@ -644,6 +644,54 @@ header.top .budget-dashboard .budget-grid .budget-overrun strong{color:#a32d2d;}
 header.top .budget-dashboard .budget-foot{color:#57657b;line-height:1.7;border-top:1px solid #e3e8f0;padding-top:14px;}
 @media(max-width:800px){header.top .budget-dashboard .budget-grid strong{font-size:25px;}}
 @media(max-width:480px){header.top .budget-dashboard .budget-grid strong{font-size:21px;}header.top .budget-dashboard .budget-heading h2{font-size:17px;}}
+
+/* Unified workspace, selected phase, compact accessible hierarchy. */
+:root{--bg:#f3f5f9;--line:#dfe5ee;--text:#17243d;--text-dim:#66738a;}
+body{background:var(--bg);}
+.wrap{max-width:1240px;}
+header.top{background:#17243d;padding:28px 0 24px;border-radius:0;margin-bottom:26px;}
+header.top .brand{padding:0 4px 8px;}
+header.top .brand h1{font-size:24px;color:#fff;}
+header.top .budget-dashboard{border-radius:18px;padding:24px;box-shadow:0 8px 24px #07122518;}
+.phase-tabs{display:flex;gap:8px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid #e2e7ef;}
+.phase-tabs button{flex:1;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #dfe5ee;border-radius:10px;background:#f7f8fb;color:#526179;font:600 14px inherit;cursor:pointer;}
+.phase-tabs button span{font-size:11px;background:#e6ebf3;padding:4px 7px;border-radius:5px;}
+.phase-tabs button.selected{background:#17243d;color:white;border-color:#17243d;box-shadow:inset 0 -3px #ff7704;}
+.phase-tabs button.selected span{background:#ffffff20;color:#fff;}
+header.top .budget-dashboard .budget-grid .profit-card{background:#fff7ef;border-top-color:#ff7704;}
+.phase-health{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-top:20px;margin-top:18px;border-top:1px solid #e5e9f0;color:#59677d;font-size:12px;}
+.phase-health b{color:#17243d;margin-inline-start:8px;}
+.health-track{flex:1;min-width:90px;height:6px;background:#e6ebf2;border-radius:9px;overflow:hidden;}
+.health-track i{display:block;height:100%;background:#238560;}
+header.top #projectKpis{display:none;}
+header.top .financial-details{margin-top:0;}
+.financial-details summary{font-size:12px;}
+.dashboard-section-head{margin-bottom:12px;}
+.dashboard-section-head h2{font-size:20px;}
+.phase-head{display:none!important;}
+.phase{border:1px solid #e0e6ef;box-shadow:0 4px 16px #17243d04;overflow:hidden;background:#fff;}
+.phase-body{display:block!important;}
+.phase-body.collapsed{display:block!important;}
+.item{padding:18px 24px;border-bottom:1px solid #edf0f5;align-items:flex-start;background:#fff!important;}
+.item:hover{background:#fafbfd!important;}
+.item-right{min-width:155px;}
+.item-total{font-size:16px;color:#17243d;}
+.item-total-tax{font-size:11px;color:#6a768a;}
+.item-display-name{font-size:15px;line-height:1.7;}
+.status-select{border-radius:8px;padding:8px 10px;font-size:12px;}
+.item-editor{border:0;margin-top:8px;}
+.item-editor>summary{color:#596c87;padding:5px 9px;border-radius:6px;background:#f2f5f9;font-size:11px;}
+.del-btn{opacity:.45;}
+.del-btn:hover,.del-btn:focus-visible{opacity:1;}
+.filters{gap:8px;border-radius:12px;position:static;}
+.filter-btn{border-radius:8px!important;padding:9px 13px!important;font-size:12px;}
+.search-box{background:white;border:1px solid #dfe5ee;min-width:220px;}
+.phase-totals{background:#f7f9fc;padding:16px 24px;border-top:1px solid #e1e7f0;}
+.phase-sale{padding:18px 24px;background:#fff;}
+.add-item-btn{margin:14px 24px;width:calc(100% - 48px);border-radius:9px;}
+footer{font-size:11px;padding:24px;color:#7b8697;}
+@media(max-width:640px){.phase-tabs{gap:5px;}.phase-tabs button{font-size:12px;padding:10px 6px;}.phase-tabs button span{display:none;}header.top .budget-dashboard{padding:16px;}.item{padding:16px;}.item-right{min-width:120px;}.item-row1{min-width:180px;}.phase-health{gap:12px;}.filters .search-box{width:100%;}}
+
 </style>
 </head>
 <body>
@@ -653,7 +701,7 @@ header.top .budget-dashboard .budget-foot{color:#57657b;line-height:1.7;border-t
   <div class="wrap">
     <div class="brand">
       <div>
-        <h1>متابعة مشتريات المشروع</h1>
+        <h1>إدارة مشتريات المشروع</h1>
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
@@ -687,7 +735,7 @@ header.top .budget-dashboard .budget-foot{color:#57657b;line-height:1.7;border-t
 </header>
 
 <div class="wrap">
-  <section class="dashboard-section-head" aria-labelledby="phaseHeading"><div><h2 id="phaseHeading">مراحل المشتريات</h2><p>تابع الإنجاز والتكلفة، وافتح المرحلة لإدارة بنودها</p></div><button type="button" class="jump-phases" onclick="document.getElementById('phases').scrollIntoView({behavior:'smooth',block:'start'})">عرض المراحل ↓</button></section>
+  <section class="dashboard-section-head" aria-labelledby="phaseHeading"><div><h2 id="phaseHeading">بنود المرحلة</h2><p>ابحث، تابع الإنجاز، وعدّل تفاصيل البند عند الحاجة</p></div><button type="button" class="jump-phases" onclick="document.getElementById('phases').scrollIntoView({behavior:'smooth',block:'start'})">عرض البنود ↓</button></section>
   <div class="filters" id="filters">
     <label class="search-box"><span aria-hidden="true">⌕</span><input id="itemSearch" type="search" aria-label="ابحث في بنود المشروع" placeholder="ابحث باسم البند أو الوصف"></label>
     <button class="filter-btn active" data-f="الكل">كل البنود</button>
@@ -1115,26 +1163,38 @@ function render(){
 }
 
 
-const APPROVED_BUDGET = Object.freeze({p2:84512.02}); // Company-approved reference, excluding VAT; never writes to financial records.
-function renderBudgetDashboard(){
-  const ids=allIds().filter(id=>getItemMeta(id).phase==="p2");
-  if(!ids.length){document.getElementById("budgetDashboard").textContent="جاري تحميل ملخص المرحلة الأولى…";return;}
-  const cost=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_without_tax,0));
-  const budget=APPROVED_BUDGET.p2, savings=roundMoney(budget-cost);
-  const sale=Number(phasesSale.p2)||0, profit=roundMoney(sale-cost);
-  const qty=ids.reduce((n,id)=>n+calcItem(id).total_qty,0);
-  const completed=ids.reduce((n,id)=>n+calcItem(id).completed,0);
-  const pct=qty?Math.round(completed/qty*100):0;
-  document.getElementById("budgetDashboard").innerHTML=`
-    <div class="budget-heading"><div><span>المرحلة الأولى · بدون الضريبة</span><h2>تجهيزات مكتب الرئيس وغرفة الاجتماعات</h2></div><b>إنجاز ${pct}%</b></div>
-    <div class="budget-grid">
-      <article><span>الميزانية المعتمدة</span><strong>${fmt(budget)}</strong><small>ريال · اعتماد الشركة</small></article>
-      <article><span>التكلفة الحالية</span><strong>${fmt(cost)}</strong><small>ريال · من بنود المرحلة</small></article>
-      <article class="${savings>=0?'budget-saving':'budget-overrun'}"><span>${savings>=0?'الوفر عن الميزانية':'تجاوز الميزانية'}</span><strong>${fmt(Math.abs(savings))}</strong><small>${(Math.abs(savings)/budget*100).toFixed(2)}% من الميزانية</small></article>
-      <article><span>الربح بدون الضريبة</span><strong>${sale>0?fmt(profit):'—'}</strong><small>${sale>0?'البيع '+fmt(sale)+' − التكلفة':'لم تحدد قيمة البيع'}</small></article>
-    </div><p class="budget-foot">مرجع الميزانية: اعتماد الشركة 11 أكتوبر 2026. الإنجاز مستقل عن السداد؛ الربح ليس رصيدًا نقديًا.</p>`;
-}
 
+const APPROVED_BUDGET=Object.freeze({p2:84512.02});
+let selectedDashboardPhase="p2";
+function selectDashboardPhase(key){
+ if(!PHASE_ORDER.some(p=>p.key===key))return;
+ selectedDashboardPhase=key;currentSearch="";document.getElementById("itemSearch").value="";
+ expandedPhases.add(key);render();
+}
+function renderBudgetDashboard(){
+ const ph=PHASE_ORDER.find(p=>p.key===selectedDashboardPhase)||PHASE_ORDER[0];
+ const ids=allIds().filter(id=>getItemMeta(id).phase===ph.key);
+ const cost=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_without_tax,0));
+ const budget=APPROVED_BUDGET[ph.key],hasBudget=Number.isFinite(budget);
+ const savings=hasBudget?roundMoney(budget-cost):null;
+ const sale=Number(phasesSale[ph.key])||0,profit=roundMoney(sale-cost);
+ const qty=ids.reduce((n,id)=>n+calcItem(id).total_qty,0);
+ const completed=ids.reduce((n,id)=>n+calcItem(id).completed,0);
+ const pct=qty?Math.round(completed/qty*100):0;
+ const done=ids.filter(id=>calcItem(id).done).length;
+ document.getElementById("budgetDashboard").innerHTML=`
+ <nav class="phase-tabs" aria-label="اختيار المرحلة">${PHASE_ORDER.map((p,i)=>`<button type="button" data-phase="${p.key}" aria-pressed="${p.key===ph.key}" class="${p.key===ph.key?'selected':''}"><span>0${i+1}</span>${escapeHtml(p.title)}</button>`).join('')}</nav>
+ <div class="budget-heading"><div><span>ملخص المرحلة · جميع المبالغ بالريال بدون الضريبة</span><h2>${escapeHtml(ph.sub)}</h2></div><b>إنجاز ${pct}%</b></div>
+ <div class="budget-grid">
+ <article><span>الميزانية المعتمدة</span><strong>${hasBudget?fmt(budget):'غير محددة'}</strong><small>${hasBudget?'اعتماد الشركة':'لم تسجل ميزانية لهذه المرحلة'}</small></article>
+ <article><span>التكلفة الحالية</span><strong>${fmt(cost)}</strong><small>${ids.length} بند في المرحلة</small></article>
+ <article class="${hasBudget?(savings>=0?'budget-saving':'budget-overrun'):''}"><span>${hasBudget&&savings<0?'تجاوز الميزانية':'الوفر عن الميزانية'}</span><strong>${hasBudget?fmt(Math.abs(savings)):'—'}</strong><small>${hasBudget?(Math.abs(savings)/budget*100).toFixed(2)+'% من الميزانية':'يتطلب ميزانية معتمدة'}</small></article>
+ <article class="profit-card"><span>الربح بدون الضريبة</span><strong>${sale>0?fmt(profit):'—'}</strong><small>${sale>0?'هامش الربح '+(profit/sale*100).toFixed(2)+'% من البيع':'لم تسجل قيمة البيع'}</small></article>
+ </div>
+ <div class="phase-health"><span>التنفيذ والتوريد <b>${done} / ${ids.length} بند مكتمل</b></span><div class="health-track"><i style="width:${pct}%"></i></div><span>قيمة البيع <b>${sale?fmt(sale):'غير محددة'}</b></span></div>
+ <p class="budget-foot">الإنجاز مستقل عن السداد. الربح = البيع − التكلفة بدون الضريبة.</p>`;
+ document.querySelectorAll(".phase-tabs button").forEach(b=>b.addEventListener("click",()=>selectDashboardPhase(b.dataset.phase)));
+}
 function renderFinancialSummary(){
   const ids = allIds();
   let totalWithout = 0, totalTax = 0, totalWith = 0;
@@ -1225,6 +1285,7 @@ function renderPhases(){
   container.innerHTML = "";
 
   PHASE_ORDER.forEach((ph, idx) => {
+    if(ph.key!==selectedDashboardPhase)return;
     const phaseIds = allIds().filter(id => getItemMeta(id).phase === ph.key)
       .sort((a,b) => getItemMeta(a).sort_order - getItemMeta(b).sort_order);
 
@@ -1251,7 +1312,7 @@ function renderPhases(){
     const profitLabel = sale === 0 ? '—' : (profit >= 0 ? '' : '-');
 
     const phaseEl = document.createElement("div");
-    const phaseExpanded = currentSearch.trim() ? visibleIds.length > 0 : expandedPhases.has(ph.key);
+    const phaseExpanded = true;
     phaseEl.className = "phase" + (phaseExpanded ? " open" : "");
 
     const head = document.createElement("div");
