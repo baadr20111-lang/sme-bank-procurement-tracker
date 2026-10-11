@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>متابعة مشتريات المشروع</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -716,6 +717,63 @@ footer{font-size:11px;padding:24px;color:#7b8697;}
  #phases .item .status-control{grid-column:1;grid-row:2;}
  #phases .item .item-right{grid-column:2;grid-row:2;}
 }
+
+body,input,select,textarea,button{font-family:"IBM Plex Sans Arabic",sans-serif!important;}
+.workspace-nav{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line);padding-bottom:12px;}
+.workspace-nav button,.report-toolbar button,#themeToggle{font:inherit;border:1px solid #dbe2ed;background:#fff;color:#25344f;border-radius:9px;padding:9px 18px;cursor:pointer;}
+.workspace-nav button[aria-pressed="true"]{background:#17243d;color:#fff;border-color:#17243d;}
+body[data-view="reports"] .dashboard-section-head,body[data-view="reports"] #filters,body[data-view="reports"] #phases{display:none;}
+#procReports[hidden]{display:none;}
+.report-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.report-toolbar select{padding:9px;border-radius:8px;border:1px solid var(--line);margin-inline-start:8px;}
+.report-paper{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;color:#17243d;}
+.report-paper h2{margin:0 0 8px;font-size:22px;}
+.report-paper p{color:#66748a;font-size:12px;}
+.report-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:22px 0;}
+.report-metrics span{background:#f3f6fa;padding:12px;border-radius:9px;font-size:12px;}
+.report-metrics b{display:block;font-size:18px;margin-top:6px;}
+.report-table-wrap{overflow:auto;}
+.report-paper table{width:100%;border-collapse:collapse;font-size:13px;}
+.report-paper th,.report-paper td{padding:12px;text-align:right;border-bottom:1px solid #e2e7ef;}
+.report-paper thead{background:#f1f4f9;}
+.report-paper tfoot{font-weight:700;background:#edf2f8;}
+html[data-theme="light"]{color-scheme:light;}
+html[data-theme="dark"]{color-scheme:dark;--bg:#101827;--text:#e4eaf4;--text-dim:#a9b6ca;--line:#334258;}
+html[data-theme="dark"] body{background:#101827;color:#e4eaf4;}
+html[data-theme="dark"] header.top .budget-dashboard,html[data-theme="dark"] .report-paper{background:#192538;color:#e4eaf4;border-color:#344258;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-heading h2,html[data-theme="dark"] .phase-health b{color:#f1f5fb;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-heading span,html[data-theme="dark"] .budget-foot,html[data-theme="dark"] .phase-health{color:#b1bfd3!important;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-grid article{background:#223148;border-color:#34465f;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-grid strong{color:#eef3fa;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-grid article>span,html[data-theme="dark"] header.top .budget-dashboard .budget-grid small{color:#b9c7dd;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-grid .budget-saving{background:#163b30;}
+html[data-theme="dark"] header.top .budget-dashboard .budget-grid .budget-saving strong{color:#8ee0b4;}
+html[data-theme="dark"] .phase-tabs button,html[data-theme="dark"] .workspace-nav button,html[data-theme="dark"] .report-toolbar button{background:#223148;color:#dce5f4;border-color:#3a4b65;}
+html[data-theme="dark"] .phase-tabs button.selected,html[data-theme="dark"] .workspace-nav button[aria-pressed="true"]{background:#334865;}
+html[data-theme="dark"] #phases .item{background:#192538!important;color:#e4eaf4;border-color:#334258;}
+html[data-theme="dark"] #phases .item .item-display-name,html[data-theme="dark"] #phases .item .item-total{color:#eef3fa!important;}
+html[data-theme="dark"] #phases .item .item-right{background:#223148!important;border-color:#34465f!important;}
+html[data-theme="dark"] #phases .item .item-total-tax,html[data-theme="dark"] #phases .item .item-notes summary,html[data-theme="dark"] #phases .item .item-display-desc{color:#b9c7dd!important;}
+html[data-theme="dark"] #phases .item .item-editor>summary{background:#27384f;color:#d8e4f5!important;}
+html[data-theme="dark"] .filters,html[data-theme="dark"] .phase-sale,html[data-theme="dark"] .phase-totals{background:#192538;color:#e4eaf4;}
+html[data-theme="dark"] .search-box,html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{background:#223148!important;color:#e4eaf4!important;border-color:#3a4b65!important;}
+html[data-theme="dark"] .report-metrics span,html[data-theme="dark"] .report-paper thead,html[data-theme="dark"] .report-paper tfoot{background:#223148;}
+html[data-theme="dark"] .report-paper p{color:#b1bfd3;}
+html[data-theme="dark"] .report-paper td,html[data-theme="dark"] .report-paper th{border-color:#344258;}
+@media print{
+ @page{size:A4 portrait;margin:12mm;}
+ body{padding:0!important;background:white!important;}
+ header.top,.workspace-nav,footer,.report-toolbar,.dashboard-section-head,#filters,#phases,.modal-bg{display:none!important;}
+ .wrap{max-width:none;padding:0;}
+ #procReports{display:block!important;}
+ .report-paper{background:white!important;color:black!important;border:0;padding:0;}
+ .report-paper *{color:black!important;}
+ .report-paper table{font-size:9pt;table-layout:fixed;}
+ .report-paper th,.report-paper td{padding:6px;overflow-wrap:anywhere;}
+ .report-paper tr{break-inside:avoid;}
+ .report-paper thead{display:table-header-group;}
+ .report-metrics{grid-template-columns:repeat(3,1fr);}
+}
 </style>
 </head>
 <body>
@@ -729,6 +787,7 @@ footer{font-size:11px;padding:24px;color:#7b8697;}
         <p>بنك المنشآت الصغيرة والمتوسطة — تطوير الهوية البصرية للبيئة الداخلية</p>
       </div>
       <div class="team-select">
+        <button type="button" id="themeToggle" aria-label="تبديل الوضع الليلي والنهاري">الوضع الليلي</button>
         <button id="exportCsvBtn" title="تنزيل تقرير المشروع" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⇩ تقرير CSV</button>
         <button id="refreshBtn" title="تحديث" style="background:#22315A;border:1px solid #3A4A78;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;">⟳ تحديث</button>
         <span id="saveStatus">جاري الاتصال...</span>
@@ -759,6 +818,8 @@ footer{font-size:11px;padding:24px;color:#7b8697;}
 </header>
 
 <div class="wrap">
+  <nav class="workspace-nav" aria-label="أقسام الموقع"><button id="workspaceBtn" type="button" aria-pressed="true" onclick="setProcView('workspace')">إدارة البنود</button><button id="reportsBtn" type="button" aria-pressed="false" onclick="setProcView('reports')">التقارير</button></nav>
+  <section id="procReports" hidden aria-label="تقارير المشتريات"></section>
   <section class="dashboard-section-head" aria-labelledby="phaseHeading"><div><h2 id="phaseHeading">بنود المرحلة</h2><p>ابحث، تابع الإنجاز، وعدّل تفاصيل البند عند الحاجة</p></div><button type="button" class="jump-phases" onclick="document.getElementById('phases').scrollIntoView({behavior:'smooth',block:'start'})">عرض البنود ↓</button></section>
   <div class="filters" id="filters">
     <label class="search-box"><span aria-hidden="true">⌕</span><input id="itemSearch" type="search" aria-label="ابحث في بنود المشروع" placeholder="ابحث باسم البند أو الوصف"></label>
@@ -1178,12 +1239,56 @@ function renderProjectKpis(){
   ).join("");
 }
 
+
+let procView="workspace",procReportScope="p2";
+function setProcView(view){
+ procView=view;document.body.dataset.view=view;
+ document.getElementById("procReports").hidden=view!=="reports";
+ document.getElementById("workspaceBtn").setAttribute("aria-pressed",String(view==="workspace"));
+ document.getElementById("reportsBtn").setAttribute("aria-pressed",String(view==="reports"));
+ if(view==="reports")renderProcReports();
+}
+function reportIds(){return allIds().filter(id=>procReportScope==="all"||getItemMeta(id).phase===procReportScope);}
+function procReportData(){
+ const ids=reportIds();
+ const cost=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_without_tax,0));
+ const tax=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_tax,0));
+ const sale=procReportScope==="all"?PHASE_ORDER.reduce((n,p)=>n+(Number(phasesSale[p.key])||0),0):(Number(phasesSale[procReportScope])||0);
+ const budget=APPROVED_BUDGET[procReportScope];
+ return {ids,cost,tax,sale,budget,profit:roundMoney(sale-cost)};
+}
+function renderProcReports(){
+ const r=procReportData(),phase=PHASE_ORDER.find(p=>p.key===procReportScope);
+ const label=phase?phase.title:"المشروع كامل";
+ document.getElementById("procReports").innerHTML=`
+ <div class="report-toolbar"><label>نطاق التقرير <select aria-label="نطاق تقرير المشتريات" onchange="procReportScope=this.value;renderProcReports()"><option value="all" ${procReportScope==='all'?'selected':''}>المشروع كامل</option>${PHASE_ORDER.map(p=>`<option value="${p.key}" ${p.key===procReportScope?'selected':''}>${escapeHtml(p.title)}</option>`).join('')}</select></label><button type="button" onclick="window.print()">طباعة / حفظ PDF</button><button type="button" onclick="exportProcReport()">تصدير Excel (CSV)</button></div>
+ <div class="report-paper"><h2>تقرير مشتريات · ${label}</h2><p>UP Marketing Group · ${new Intl.DateTimeFormat('ar-SA',{calendar:'gregory',numberingSystem:'latn',timeZone:'Asia/Riyadh'}).format(new Date())} · ريال سعودي</p>
+ <div class="report-metrics"><span>التكلفة بدون الضريبة <b>${fmt(r.cost)}</b></span><span>الضريبة المحسوبة <b>${fmt(r.tax)}</b></span><span>الميزانية <b>${Number.isFinite(r.budget)?fmt(r.budget):'غير محددة'}</b></span><span>الوفر <b>${Number.isFinite(r.budget)?fmt(roundMoney(r.budget-r.cost)):'—'}</b></span><span>قيمة البيع <b>${r.sale?fmt(r.sale):'غير محددة'}</b></span><span>الربح <b>${r.sale?fmt(r.profit):'—'}</b></span><span>هامش الربح <b>${r.sale?(r.profit/r.sale*100).toFixed(2)+'%':'—'}</b></span></div>
+ ${procReportScope==='all'?'<p class="report-note">البيع الإجمالي يشمل القيم المسجلة فقط؛ المراحل التي لا تملك قيمة بيع لا تمثل إيرادًا مكتملًا. لا توجد ميزانية معتمدة لجميع المراحل.</p>':''}
+ <div class="report-table-wrap"><table><thead><tr><th>البند</th><th>المرحلة</th><th>الكمية</th><th>التكلفة بدون الضريبة</th><th>الإنجاز</th></tr></thead><tbody>${r.ids.map(id=>{const m=getItemMeta(id),c=calcItem(id),p=PHASE_ORDER.find(p=>p.key===m.phase);return `<tr><td>${escapeHtml(m.name)}</td><td>${escapeHtml(p?.title||m.phase)}</td><td>${c.total_qty}</td><td>${fmt(c.line_without_tax)}</td><td>${c.total_qty?Math.round(c.completed/c.total_qty*100):0}%</td></tr>`;}).join('')}</tbody><tfoot><tr><th colspan="3">الإجمالي</th><th>${fmt(r.cost)}</th><th>—</th></tr></tfoot></table></div></div>`;
+}
+function exportProcReport(){
+ const r=procReportData();
+ const rows=[["البند","المرحلة","الكمية","التكلفة بدون الضريبة","الضريبة","الإنجاز %"],...r.ids.map(id=>{const m=getItemMeta(id),c=calcItem(id);return [m.name,PHASE_ORDER.find(p=>p.key===m.phase)?.title||m.phase,c.total_qty,c.line_without_tax.toFixed(2),c.line_tax.toFixed(2),c.total_qty?Math.round(c.completed/c.total_qty*100):0];}),["الإجمالي","","",r.cost.toFixed(2),r.tax.toFixed(2),""],["الميزانية","","",Number.isFinite(r.budget)?r.budget.toFixed(2):"غير محددة"],["البيع","","",r.sale||"غير محددة"],["الربح","","",r.sale?r.profit.toFixed(2):"غير محدد"],["الوفر","","",Number.isFinite(r.budget)?roundMoney(r.budget-r.cost).toFixed(2):"غير محدد"]];
+ const cell=v=>{let t=String(v??"");if(/^[=+@-]/.test(t.trimStart()))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
+ const blob=new Blob(["\uFEFF"+rows.map(row=>row.map(cell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="procurement-"+procReportScope+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function applyProcTheme(theme){
+ document.documentElement.dataset.theme=theme;
+ document.getElementById("themeToggle").textContent=theme==="dark"?"الوضع النهاري":"الوضع الليلي";
+}
+document.getElementById("themeToggle").addEventListener("click",()=>{
+ const theme=document.documentElement.dataset.theme==="dark"?"light":"dark";applyProcTheme(theme);try{localStorage.setItem("up-proc-theme",theme);}catch(e){}
+});
+try{applyProcTheme(localStorage.getItem("up-proc-theme")==="dark"?"dark":"light");}catch(e){applyProcTheme("light");}
 function render(){
   renderBudgetDashboard();
   renderProjectKpis();
   renderFinancialSummary();
   renderProgress();
   renderPhases();
+  if(procView==="reports")renderProcReports();
 }
 
 
