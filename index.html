@@ -692,6 +692,30 @@ header.top .financial-details{margin-top:0;}
 footer{font-size:11px;padding:24px;color:#7b8697;}
 @media(max-width:640px){.phase-tabs{gap:5px;}.phase-tabs button{font-size:12px;padding:10px 6px;}.phase-tabs button span{display:none;}header.top .budget-dashboard{padding:16px;}.item{padding:16px;}.item-right{min-width:120px;}.item-row1{min-width:180px;}.phase-health{gap:12px;}.filters .search-box{width:100%;}}
 
+
+/* Scope light workspace explicitly; neutralize inherited dark-mode card rules. */
+#phases .item{display:grid;grid-template-columns:125px minmax(0,1fr) 205px;gap:18px;align-items:center;padding:16px 20px;min-height:0;background:#fff!important;color:#17243d;}
+#phases .item .item-row1{grid-column:2;grid-row:1;min-width:0;gap:4px;}
+#phases .item .item-display-name{color:#17243d!important;font-size:15px;font-weight:700;line-height:1.5;}
+#phases .item .status-control{grid-column:1;grid-row:1;align-self:center;width:100%;}
+#phases .item .status-select{width:100%;background:#f1f4f8;color:#3c4f69;border:1px solid #d9e1eb;padding:8px;font-size:12px;min-height:36px;}
+#phases .item .status-select.status-done{background:#eaf6ef;color:#216448;border-color:#cbe7d5;}
+#phases .item .status-select.status-partial{background:#fff5df;color:#815a16;border-color:#ecddb6;}
+#phases .item .item-right{grid-column:3;grid-row:1;min-width:0;width:100%;background:#f4f6fa!important;border:1px solid #e0e6ef!important;border-radius:10px;padding:12px 14px;padding-left:42px;gap:4px;align-items:flex-start;}
+#phases .item .item-total{color:#17243d!important;font-size:16px;font-weight:750;}
+#phases .item .item-total-tax{color:#596a81!important;font-size:11px;}
+#phases .item .item-notes summary{color:#526986!important;font-size:11px;}
+#phases .item .item-display-desc{color:#526179!important;}
+#phases .item .item-editor>summary{color:#526179!important;background:#f1f4f8;padding:4px 8px;font-size:11px;}
+#phases .item .item-editor{margin-top:3px;}
+#phases .item .item-editor input,#phases .item .item-editor textarea{color:#17243d;background:#fff;border-color:#dce3ed;}
+#phases .item .del-btn{color:#8b6670;border-color:#e0d9df;background:transparent;}
+@media(max-width:640px){
+ #phases .item{grid-template-columns:110px minmax(0,1fr);gap:10px;padding:14px;}
+ #phases .item .item-row1{grid-column:1/-1;grid-row:1;}
+ #phases .item .status-control{grid-column:1;grid-row:2;}
+ #phases .item .item-right{grid-column:2;grid-row:2;}
+}
 </style>
 </head>
 <body>
