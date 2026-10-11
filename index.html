@@ -822,11 +822,45 @@ html[data-theme="dark"] #phases .item .item-right{background:transparent!importa
 @media(max-width:900px){.app-sidebar{width:160px;padding:24px 12px;}#app{margin-right:160px;}.sidebar-brand{font-size:36px;}}
 @media(max-width:640px){.app-sidebar{position:static;width:100%;height:auto;display:flex;align-items:center;gap:8px;padding:12px;}.sidebar-brand{font-size:23px;padding:0 8px;border:0;}.sidebar-brand span,.app-sidebar p,.sidebar-note{display:none;}.app-sidebar button{width:auto;margin:0;padding:9px 13px;}#app{margin-right:0;}#phases .item{grid-template-columns:100px minmax(0,1fr);}.workspace-nav{display:flex;}}
 @media print{.app-sidebar,.panel-overlay{display:none!important;}#app{margin:0!important;}}
+
+body[data-view="overview"] .dashboard-section-head,body[data-view="overview"] #filters,body[data-view="overview"] #phases,body[data-view="overview"] #budgetDashboard{display:none!important;}
+#procOverview[hidden]{display:none;}
+.overview-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:18px;}
+.overview-heading h2{font-size:27px;margin:5px 0;}
+.overview-heading span,.overview-heading p{font-size:12px;color:var(--text-dim);margin:0;}
+.overview-badge{background:#e9f5ee;padding:10px 14px;border-radius:9px;color:#276a4b!important;}
+.overview-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.overview-kpis article,.overview-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;}
+.overview-kpis article{display:flex;flex-direction:column;gap:10px;}
+.overview-kpis small,.overview-kpis span{font-size:12px;color:var(--text-dim);}
+.overview-kpis strong{font-size:28px;direction:ltr;text-align:right;}
+.overview-columns{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-bottom:18px;}
+.overview-card h3{font-size:16px;margin:0 0 20px;}
+.phase-overview-row{width:100%;display:flex;gap:15px;align-items:center;justify-content:space-between;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:right;padding:14px 0;cursor:pointer;}
+.phase-overview-row div:first-child{display:flex;flex-direction:column;gap:6px;flex:1;}
+.phase-overview-row small{color:var(--text-dim);font-size:10px;}
+.phase-overview-row span{font-size:12px;}
+.phase-overview-progress{width:90px;text-align:left;}
+.phase-overview-progress b{font-size:14px;}
+.phase-overview-progress i,.distribution-row i{display:block;height:6px;border-radius:8px;background:#e5eaf1;overflow:hidden;margin-top:8px;}
+.phase-overview-progress em,.distribution-row em{display:block;height:100%;background:#2d9b89;border-radius:8px;}
+.distribution-row{margin-bottom:20px;}
+.distribution-row div{display:flex;justify-content:space-between;gap:12px;font-size:12px;}
+.distribution-row small{display:block;color:var(--text-dim);font-size:11px;margin-top:6px;}
+.finance-overview-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 0;border-bottom:1px solid var(--line);font-size:12px;}
+.finance-overview-row b{grid-column:1/-1;font-size:14px;}
+.overview-alerts{border-right:3px solid #e3a15e;}
+.overview-alerts p{font-size:12px;color:var(--text-dim);}
+html[data-theme="dark"] .overview-card,html[data-theme="dark"] .overview-kpis article{background:#192538;}
+html[data-theme="dark"] .overview-badge{background:#193e32;color:#9cd5b5!important;}
+@media(max-width:850px){.overview-kpis{grid-template-columns:repeat(2,1fr);}.overview-columns{grid-template-columns:1fr;}}
+@media(max-width:480px){.overview-kpis article,.overview-card{padding:16px;}.overview-kpis strong{font-size:24px;}.overview-heading{flex-wrap:wrap;}}
+@media print{#procOverview{display:none!important;}}
 </style>
 </head>
 <body>
 
-<aside class="app-sidebar"><div class="sidebar-brand">UP<span>MARKETING GROUP</span></div><p>إدارة المشروع</p><button onclick="setProcView('workspace')" type="button">المشتريات</button><button onclick="setProcView('reports')" type="button">التقارير</button><div class="sidebar-note">بنك المنشآت<br>الصغيرة والمتوسطة</div></aside><div id="app">
+<aside class="app-sidebar"><div class="sidebar-brand">UP<span>MARKETING GROUP</span></div><p>إدارة المشروع</p><button onclick="setProcView('overview')" type="button">نظرة عامة</button><button onclick="setProcView('workspace')" type="button">المشتريات</button><button onclick="setProcView('reports')" type="button">التقارير</button><div class="sidebar-note">بنك المنشآت<br>الصغيرة والمتوسطة</div></aside><div id="app" data-initial-view="overview">
 <header class="top">
   <div class="wrap">
     <div class="brand">
@@ -867,6 +901,7 @@ html[data-theme="dark"] #phases .item .item-right{background:transparent!importa
 
 <div class="wrap">
   <nav class="workspace-nav" aria-label="أقسام الموقع"><button id="workspaceBtn" type="button" aria-pressed="true" onclick="setProcView('workspace')">إدارة البنود</button><button id="reportsBtn" type="button" aria-pressed="false" onclick="setProcView('reports')">التقارير</button></nav>
+  <section id="procOverview" aria-label="لوحة قيادة المشروع"></section>
   <section id="procReports" hidden aria-label="تقارير المشتريات"></section>
   <section class="dashboard-section-head" aria-labelledby="phaseHeading"><div><h2 id="phaseHeading">بنود المرحلة</h2><p>ابحث، تابع الإنجاز، وعدّل تفاصيل البند عند الحاجة</p></div><button type="button" class="jump-phases" onclick="document.getElementById('phases').scrollIntoView({behavior:'smooth',block:'start'})">عرض البنود ↓</button></section>
   <div class="filters" id="filters">
@@ -1288,9 +1323,12 @@ function renderProjectKpis(){
 }
 
 
-let procView="workspace",procReportScope="p2";
+let procView="overview",procReportScope="p2";
+document.body.dataset.view="overview";
 function setProcView(view){
  procView=view;document.body.dataset.view=view;
+ document.getElementById("procOverview").hidden=view!=="overview";
+ if(view==="overview")renderProcOverview();
  document.getElementById("procReports").hidden=view!=="reports";
  document.getElementById("workspaceBtn").setAttribute("aria-pressed",String(view==="workspace"));
  document.getElementById("reportsBtn").setAttribute("aria-pressed",String(view==="reports"));
@@ -1305,6 +1343,28 @@ function procReportData(){
  const budget=APPROVED_BUDGET[procReportScope];
  return {ids,cost,tax,sale,budget,profit:roundMoney(sale-cost)};
 }
+
+function renderProcOverview(){
+ const phases=PHASE_ORDER.map(p=>{
+  const ids=allIds().filter(id=>getItemMeta(id).phase===p.key);
+  const cost=roundMoney(ids.reduce((n,id)=>n+calcItem(id).line_without_tax,0));
+  const qty=ids.reduce((n,id)=>n+calcItem(id).total_qty,0),doneQty=ids.reduce((n,id)=>n+calcItem(id).completed,0);
+  return {...p,ids,cost,pct:qty?Math.round(doneQty/qty*100):0,sale:Number(phasesSale[p.key])||0,budget:APPROVED_BUDGET[p.key]};
+ });
+ const total=roundMoney(phases.reduce((n,p)=>n+p.cost,0)),all=allIds(),done=all.filter(id=>calcItem(id).done).length;
+ const top=[...all].sort((a,b)=>calcItem(b).line_without_tax-calcItem(a).line_without_tax).slice(0,5);
+ const max=top.length?calcItem(top[0]).line_without_tax:1;
+ document.getElementById("procOverview").innerHTML=`
+ <div class="overview-heading"><div><span>لوحة قيادة المشروع</span><h2>نظرة عامة</h2><p>التكاليف والإنجاز والمراحل في مكان واحد</p></div><span class="overview-badge">${done} من ${all.length} بند مكتمل</span></div>
+ <div class="overview-kpis"><article><small>تكلفة المشروع المسجلة</small><strong>${fmt(total)}</strong><span>ريال · بدون الضريبة</span></article><article><small>المراحل</small><strong>${phases.length}</strong><span>نطاق المشروع الحالي</span></article><article><small>البنود المكتملة</small><strong>${done}</strong><span>من ${all.length} بند</span></article><article><small>تحتاج استكمال</small><strong>${all.length-done}</strong><span>يشمل الجزئي وغير المكتمل</span></article></div>
+ <div class="overview-columns"><section class="overview-card"><h3>مقارنة المراحل</h3>${phases.map(p=>`<button class="phase-overview-row" data-open-phase="${p.key}"><div><b>${escapeHtml(p.title)}</b><small>${escapeHtml(p.sub)}</small><span>${fmt(p.cost)} ريال</span></div><div class="phase-overview-progress"><b>${p.pct}%</b><i><em style="width:${p.pct}%"></em></i></div><span>←</span></button>`).join('')}</section>
+ <section class="overview-card"><h3>توزيع تكلفة المشروع</h3>${phases.map((p,i)=>`<div class="distribution-row"><div><span>${escapeHtml(p.title)}</span><b>${total?(p.cost/total*100).toFixed(1):0}%</b></div><i><em style="width:${total?p.cost/total*100:0}%;background:${['#ff7704','#5874a5','#2d9b89'][i]}"></em></i><small>${fmt(p.cost)} ريال</small></div>`).join('')}</section></div>
+ <div class="overview-columns"><section class="overview-card"><h3>الميزانية والربح</h3>${phases.map(p=>`<div class="finance-overview-row"><b>${escapeHtml(p.title)}</b><span>الميزانية: ${Number.isFinite(p.budget)?fmt(p.budget):'غير محددة'}</span><span>الوفر: ${Number.isFinite(p.budget)?fmt(roundMoney(p.budget-p.cost)):'—'}</span><span>الربح: ${p.sale?fmt(roundMoney(p.sale-p.cost)):'غير محدد'} ${p.sale?'· '+((p.sale-p.cost)/p.sale*100).toFixed(2)+'%':''}</span></div>`).join('')}</section>
+ <section class="overview-card"><h3>أعلى البنود تكلفة</h3>${top.map(id=>`<div class="distribution-row"><div><span>${escapeHtml(getItemMeta(id).name)}</span><b>${fmt(calcItem(id).line_without_tax)}</b></div><i><em style="width:${max?calcItem(id).line_without_tax/max*100:0}%"></em></i></div>`).join('')}</section></div>
+ <section class="overview-card overview-alerts"><h3>ما يحتاج مراجعة</h3><p>${phases.filter(p=>!Number.isFinite(p.budget)).map(p=>escapeHtml(p.title)).join(' و ')}: الميزانية المعتمدة غير مسجلة.</p><p>${phases.filter(p=>!p.sale).map(p=>escapeHtml(p.title)).join(' و ')}: قيمة البيع غير مسجلة؛ لا يمكن تأكيد الربح.</p><p>بيانات السداد غير موثقة في سجل مستقل؛ لا تعتبر نسبة الإنجاز دليلًا على الدفع.</p></section>`;
+ document.querySelectorAll("[data-open-phase]").forEach(b=>b.onclick=()=>{selectDashboardPhase(b.dataset.openPhase);setProcView("workspace");});
+}
+
 function renderProcReports(){
  const r=procReportData(),phase=PHASE_ORDER.find(p=>p.key===procReportScope);
  const label=phase?phase.title:"المشروع كامل";
@@ -1373,6 +1433,7 @@ function render(){
   renderProgress();
   renderPhases();
   if(procView==="reports")renderProcReports();
+  if(procView==="overview")renderProcOverview();
 }
 
 
