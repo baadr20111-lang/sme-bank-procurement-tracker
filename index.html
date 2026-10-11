@@ -873,6 +873,18 @@ body[data-view="overview"] .app-sidebar button:first-of-type{background:#ff7704;
 html[data-theme="dark"] .dashboard-quality{background:#302a22;border-color:#564b35;color:#dfc9a4;}
 @media(max-width:850px){.scoped-finance>div{grid-template-columns:repeat(2,1fr);}}
 .drill-phase-head{display:flex!important;padding:12px 20px!important;background:var(--bg)!important;color:var(--text)!important;}.drill-phase-head h2{font-size:15px!important;color:var(--text)!important;}.drill-phase-head .phase-progress-wrap,.drill-phase-head .chev{display:none!important;}
+
+.reported-payments{margin:18px 0;background:#fff;border:1px solid var(--line);border-right:3px solid #e9a15c;border-radius:12px;padding:20px;color:var(--text);}
+.reported-payments>div:first-child{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;}
+.reported-payments h3{font-size:15px;margin:0;}
+.reported-payments p{font-size:11px;color:var(--text-dim);line-height:1.8;}
+.payment-rows{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;}
+.payment-rows article{display:flex;flex-direction:column;gap:8px;background:#f5f7fa;border-radius:8px;padding:12px;font-size:12px;}
+.payment-rows span{color:#93602d;font-size:11px;}
+html[data-theme="dark"] .reported-payments{background:#192538;color:#eaf0fb;}
+html[data-theme="dark"] .payment-rows article{background:#223148;}
+html[data-theme="dark"] .payment-rows span{color:#e9bd89;}
+@media(max-width:750px){.payment-rows{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
@@ -1392,6 +1404,7 @@ function renderProcOverview(){
  <section class="overview-card"><h3>توزيع تكلفة النطاق المختار</h3>${shown.map((p,i)=>`<div class="distribution-row"><div><span>${escapeHtml(p.title)}</span><b>${total?(p.cost/total*100).toFixed(1):0}%</b></div><i><em style="width:${total?p.cost/total*100:0}%;background:${['#ff7704','#5874a5','#2d9b89'][i]}"></em></i><small>${fmt(p.cost)} ريال</small></div>`).join('')}</section></div>
  <div class="overview-columns"><section class="overview-card"><h3>الميزانية والربح</h3>${phases.map(p=>`<div class="finance-overview-row"><b>${escapeHtml(p.title)}</b><span>الميزانية: ${Number.isFinite(p.budget)?fmt(p.budget):'غير محددة'}</span><span>مبلغ التوفير: ${Number.isFinite(p.budget)?fmt(roundMoney(p.budget-p.cost)):'—'}</span><span>الربح: ${p.sale?fmt(roundMoney(p.sale-p.cost)):'غير محدد'} ${p.sale?'· '+((p.sale-p.cost)/p.sale*100).toFixed(2)+'%':''}</span></div>`).join('')}</section>
  <section class="overview-card"><h3>أعلى البنود تكلفة</h3>${top.map(id=>`<div class="distribution-row"><div><span>${escapeHtml(getItemMeta(id).name)}</span><b>${fmt(calcItem(id).line_without_tax)}</b></div><i><em style="width:${max?calcItem(id).line_without_tax/max*100:0}%"></em></i></div>`).join('')}</section></div>
+ ${overviewScope==="all"||overviewScope==="p2"?reportedPhaseOnePayments():""}
  <section class="overview-card overview-alerts"><h3>ما يحتاج مراجعة</h3><p>${phases.filter(p=>!Number.isFinite(p.budget)).map(p=>escapeHtml(p.title)).join(' و ')}: الميزانية المعتمدة غير مسجلة.</p><p>${phases.filter(p=>!p.sale).map(p=>escapeHtml(p.title)).join(' و ')}: قيمة البيع غير مسجلة؛ لا يمكن تأكيد الربح.</p><p>بيانات السداد غير موثقة في سجل مستقل؛ لا تعتبر نسبة الإنجاز دليلًا على الدفع.</p></section>`;
  document.querySelectorAll("[data-open-filter]").forEach(b=>{
  const open=()=>openOverviewItems(b.dataset.openFilter);
@@ -1480,6 +1493,19 @@ function selectDashboardPhase(key){
  workspaceAllPhases=false;selectedDashboardPhase=key;currentSearch="";document.getElementById("itemSearch").value="";
  expandedPhases.add(key);render();
 }
+
+function reportedPhaseOnePayments(){
+ // Management-confirmed balances as of 2026-10-11. Not a payment ledger or bank reconciliation.
+ const rows=[
+ {name:"القاعدة الرخامية",status:"غير مسدد",balance:1035},
+ {name:"اللوحات",status:"غير مسدد",balance:42900.75},
+ {name:"أتعاب نهى",status:"غير مسدد",balance:10000},
+ {name:"الأعلام (السعودية والبنك)",status:"مسدد جزئيًا · المتبقي 50%",balance:3105}
+ ];
+ const total=roundMoney(rows.reduce((n,r)=>n+r.balance,0));
+ return `<section class="reported-payments"><div><h3>التسليم والسداد مستقلان</h3><b>متبقي السداد المؤكد من الإدارة: ${fmt(total)} ريال</b></div><p>مبالغ شاملة الضريبة حيث تنطبق · تأكيد الإدارة بتاريخ 11 أكتوبر 2026، وليست مطابقة بنكية. لا يوجد حكم على سداد بقية البنود.</p><div class="payment-rows">${rows.map(r=>`<article><strong>${r.name}</strong><span>${r.status}</span><b>${fmt(r.balance)} ريال</b></article>`).join('')}</div></section>`;
+}
+
 function renderBudgetDashboard(){
  const ph=PHASE_ORDER.find(p=>p.key===selectedDashboardPhase)||PHASE_ORDER[0];
  const ids=allIds().filter(id=>getItemMeta(id).phase===ph.key);
@@ -1501,6 +1527,7 @@ function renderBudgetDashboard(){
  <article class="profit-card"><span>الربح بدون الضريبة</span><strong>${sale>0?fmt(profit):'—'}</strong><small>${sale>0?'هامش الربح '+(profit/sale*100).toFixed(2)+'% من البيع':'لم تسجل قيمة البيع'}</small></article>
  </div>
  <div class="phase-health"><span>التنفيذ والتوريد <b>${done} / ${ids.length} بند مكتمل</b></span><div class="health-track"><i style="width:${pct}%"></i></div><span>قيمة البيع <b>${sale?fmt(sale):'غير محددة'}</b></span></div>
+ ${ph.key==="p2"?reportedPhaseOnePayments():""}
  <p class="budget-foot">الإنجاز مستقل عن السداد. الربح = البيع − التكلفة بدون الضريبة.</p>`;
  document.querySelectorAll(".phase-tabs button").forEach(b=>b.addEventListener("click",()=>selectDashboardPhase(b.dataset.phase)));
 }
