@@ -1084,20 +1084,20 @@ function renderFinancialSummary(){
   const remPct = 100 - spentPct;
 
   const totalSale = (Number(phasesSale.p1)||0) + (Number(phasesSale.p2)||0) + (Number(phasesSale.p3)||0);
-  const totalProfit = totalSale - totalWith;
+  const totalProfit = roundMoney(totalSale - totalWithout);
   const totalProfitPct = totalSale > 0 ? (totalProfit / totalSale) * 100 : 0;
   const profitClass = totalSale === 0 ? 'profit-neutral' : (totalProfit >= 0 ? 'profit-positive' : 'profit-negative');
   const profitLabel = totalSale === 0 ? '—' : (totalProfit >= 0 ? '' : '-');
 
   document.getElementById("financialSummary").innerHTML = `
     <div class="fs-card spent">
-      <div class="fs-label">المنفَق (المنجز)</div>
+      <div class="fs-label">تكلفة المنجَز (شاملة الضريبة)</div>
       <div class="fs-amount">${fmt(spentWith)}<span class="fs-cur">ريال</span></div>
       <div class="fs-pct">${spentPct}% من إجمالي المشروع</div>
       <div class="fs-bar"><div style="width:${spentPct}%"></div></div>
     </div>
     <div class="fs-card remaining">
-      <div class="fs-label">المتبقي</div>
+      <div class="fs-label">تكلفة غير المنجَز</div>
       <div class="fs-amount">${fmt(remainingWith)}<span class="fs-cur">ريال</span></div>
       <div class="fs-pct">${remPct}% من إجمالي المشروع</div>
       <div class="fs-bar"><div style="width:${remPct}%"></div></div>
@@ -1108,12 +1108,12 @@ function renderFinancialSummary(){
       <div class="fs-pct">بدون ضريبة: ${fmt(totalWithout)} | ضريبة: ${fmt(totalTax)}</div>
     </div>
     <div class="fs-card sale">
-      <div class="fs-label">💰 إجمالي البيع</div>
+      <div class="fs-label">💰 إجمالي البيع بدون الضريبة</div>
       <div class="fs-amount">${fmt(totalSale)}<span class="fs-cur">ريال</span></div>
       <div class="fs-pct">مجموع البيع من المراحل الثلاث</div>
     </div>
     <div class="fs-card ${totalSale === 0 ? 'total' : (totalProfit >= 0 ? 'profit' : 'loss')}">
-      <div class="fs-label">📈 إجمالي الربح</div>
+      <div class="fs-label">📈 إجمالي الربح بدون الضريبة</div>
       <div class="fs-amount">${profitLabel}${fmt(Math.abs(totalProfit))}<span class="fs-cur">ريال</span></div>
       <div class="fs-pct">${totalSale === 0 ? 'أدخل البيع لحساب الربح' : (totalProfitPct.toFixed(2) + '% من البيع')}</div>
     </div>
@@ -1174,7 +1174,7 @@ function renderPhases(){
     const visibleIds = phaseIds.filter(itemPassesFilter);
 
     const sale = Number(phasesSale[ph.key]) || 0;
-    const profit = sale - phaseWith;
+    const profit = roundMoney(sale - phaseWithout);
     const profitPct = sale > 0 ? (profit / sale) * 100 : 0;
     const profitClass = sale === 0 ? 'profit-neutral' : (profit >= 0 ? 'profit-positive' : 'profit-negative');
     const profitLabel = sale === 0 ? '—' : (profit >= 0 ? '' : '-');
@@ -1220,12 +1220,13 @@ function renderPhases(){
 
     const totals = document.createElement("div");
     totals.className = "phase-totals";
+    totals.title = "تكلفة المنجز مرتبطة بالتوريد والتنفيذ وليست مبلغًا مسددًا. السداد مستقل عن نسبة الإنجاز؛ الربح = البيع بدون الضريبة ناقص التكلفة بدون الضريبة.";
     totals.innerHTML = `
       <span>إجمالي المرحلة: <b class="num">${fmt(phaseWith)}</b> ريال</span>
       <span>بدون ضريبة: <b class="num">${fmt(phaseWithout)}</b></span>
       <span>الضريبة: <b class="num">${fmt(phaseTax)}</b></span>
-      <span class="spent-tag">المنفَق: <b class="num">${fmt(phaseSpentWith)}</b> ريال</span>
-      <span class="rem-tag">المتبقي: <b class="num">${fmt(phaseRemaining)}</b> ريال</span>
+      <span class="spent-tag">تكلفة المنجَز: <b class="num">${fmt(phaseSpentWith)}</b> ريال</span>
+      <span class="rem-tag">تكلفة غير المنجَز: <b class="num">${fmt(phaseRemaining)}</b> ريال</span>
     `;
     body.appendChild(totals);
 
@@ -1233,12 +1234,12 @@ function renderPhases(){
     saleSection.className = "phase-sale";
     saleSection.innerHTML = `
       <div class="sale-field">
-        <label>💵 قيمة البيع:</label>
+        <label>💵 قيمة البيع بدون الضريبة:</label>
         <input type="number" lang="en" class="sale-input" min="0" step="0.01" value="${sale || ''}" placeholder="0">
         <span style="font-size:13px;color:var(--text-dim);">ريال</span>
       </div>
       <div class="profit-info ${profitClass}">
-        <span class="label">📈 الربح:</span>
+        <span class="label">📈 الربح بدون الضريبة:</span>
         <span class="amount">${profitLabel}${fmt(Math.abs(profit))} ريال</span>
         <span class="pct-pill">${sale > 0 ? (profit >= 0 ? '+' : '') + profitPct.toFixed(2) + '%' : '—'}</span>
       </div>
@@ -1252,6 +1253,10 @@ function renderPhases(){
       render();
     });
     body.appendChild(saleSection);
+    const accountingNote = document.createElement("p");
+    accountingNote.style.cssText = "padding:0 18px 12px;margin:0;font-size:12px;color:var(--text-dim)";
+    accountingNote.textContent = "الربح = البيع بدون الضريبة − التكلفة بدون الضريبة. الإنجاز يقيس التوريد والتنفيذ فقط؛ تكلفة المنجَز ليست مبلغًا مسددًا، والمتبقي للدفع لا يزيد الربح.";
+    body.appendChild(accountingNote);
 
     const togglePhase = () => {
       const willExpand = body.classList.contains("collapsed");
@@ -1284,7 +1289,7 @@ function renderItemRow(id){
   const right = document.createElement("div");
   right.className = "item-right";
   const spentHtml = c.completed > 0 ? 
-    `<div class="item-spent-info">منفَق: ${fmt(c.spent_with_tax)} ريال</div>` : '';
+    `<div class="item-spent-info">تكلفة المنجَز: ${fmt(c.spent_with_tax)} ريال</div>` : '';
   right.innerHTML = `
     <div class="item-total">${fmt(c.line_with_tax)} ريال</div>
     <div class="item-total-tax">${c.isExempt ? 'معفى من الضريبة' : 'سعر: ' + fmt(c.line_without_tax) + ' + ضريبة: ' + fmt(c.line_tax)}</div>
@@ -1517,7 +1522,7 @@ document.getElementById("itemSearch").addEventListener("input", e=>{
 });
 
 function downloadProjectCsv(){
-  const rows=[["المرحلة","البند","الوصف","الوحدة","الكمية","المكتمل","المتبقي","سعر الوحدة","الضريبة","الإجمالي شامل الضريبة","المنفَق","المتبقي المالي","حالة التنفيذ","قيمة بيع المرحلة"]];
+  const rows=[["المرحلة","البند","الوصف","الوحدة","الكمية","المكتمل","المتبقي","سعر الوحدة","الضريبة","الإجمالي شامل الضريبة","تكلفة المنجَز شامل الضريبة","تكلفة غير المنجَز شامل الضريبة","حالة التنفيذ","قيمة بيع المرحلة بدون الضريبة"]];
   PHASE_ORDER.forEach(ph=>{
     const ids=allIds().filter(id=>getItemMeta(id).phase===ph.key).sort((a,b)=>getItemMeta(a).sort_order-getItemMeta(b).sort_order);
     const sale=Number(phasesSale[ph.key])||0;
