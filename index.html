@@ -1183,13 +1183,19 @@ function subscribeRealtime(){
 
 async function loadState(){
   if(dirtyLocal || saveInFlight || saleSaveInFlight || pendingSaleVersions.size) return;
+  const itemRevision = saveVersion;
+  const phaseRevision = saleVersion;
+  const changedDuringLoad = () => dirtyLocal || saveInFlight || saleSaveInFlight || pendingSaleVersions.size || saveVersion !== itemRevision || saleVersion !== phaseRevision;
   try{
     setStatus("جاري التحديث...", "#CDD5E6", true);
     const remote = await apiGet();
+    if(changedDuringLoad()) return;
     state = { items: remote.items };
     itemsMeta = remote.meta;
     try{
-      phasesSale = await apiGetPhases();
+      const remotePhases = await apiGetPhases();
+      if(changedDuringLoad()) return;
+      phasesSale = remotePhases;
       setStatus("متصل ✓", "#8DE0C8");
     }catch(error){
       console.warn('phase budgets unavailable; previous values retained',error);
