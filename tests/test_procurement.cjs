@@ -3,10 +3,11 @@ const sourcePath=fs.existsSync(__dirname+'/procurement.html')?__dirname+'/procur
 const html=fs.readFileSync(sourcePath,'utf8');
 const js=html.split('<script>')[1].split('</script>')[0];
 new vm.Script(js);
-const node={addEventListener(){},classList:{toggle(){}},style:{}};
-const context=vm.createContext({console,Date,Map,Set,setTimeout,clearTimeout,document:{getElementById:()=>node,addEventListener(){},querySelectorAll:()=>[]},window:{addEventListener(){}}});
+const node={addEventListener(){},classList:{toggle(){}},setAttribute(){},style:{}};
+const context=vm.createContext({console,Date,Map,Set,setTimeout,clearTimeout,document:{body:{dataset:{}},documentElement:{dataset:{}},getElementById:()=>node,addEventListener(){},querySelectorAll:()=>[]},window:{addEventListener(){}}});
 vm.runInContext(js.slice(0,js.lastIndexOf('(async function(){')),context);
 vm.runInContext('render=()=>{}; setStatus=()=>{}',context);
+const originalApiGet=vm.runInContext('apiGet',context),originalApiPut=vm.runInContext('apiPut',context);
 (async()=>{
  let pages=[[{id:'1'}],[{id:'2'}],[]],requests=[];
  context.mockRead=async path=>{requests.push(path);return pages.shift()};
@@ -46,4 +47,20 @@ vm.runInContext('render=()=>{}; setStatus=()=>{}',context);
  assert.equal(vm.runInContext('dirtyLocal',context),true);
  assert.match(context.message,/فشل الحفظ/);
  console.log('PASS: failed save retains pending edits instead of reporting success');
+
+ context.zeroRow={id:'zero-fixture',total_qty:0,unit_price:100,tax_included:false,completed_qty:0};
+ vm.runInContext('procurementFetchAll=async()=>[zeroRow]',context);
+ const zeroRead=await originalApiGet();
+ context.zeroMeta=zeroRead.meta;context.zeroItems=zeroRead.items;
+ vm.runInContext('itemsMeta=zeroMeta;state={items:zeroItems}',context);
+ assert.equal(vm.runInContext('calcItem("zero-fixture").line_with_tax',context),0);
+ vm.runInContext('applyRemoteRow(zeroRow)',context);
+ assert.equal(vm.runInContext('itemsMeta["zero-fixture"].total_qty',context),0);
+ let zeroWrite;
+ context.captureZero=async(path,options)=>{zeroWrite=JSON.parse(options.body);return null};
+ vm.runInContext('sbFetch=captureZero',context);
+ await originalApiPut({'zero-fixture':{...zeroRead.items['zero-fixture'],...zeroRead.meta['zero-fixture']}});
+ assert.equal(zeroWrite[0].total_qty,0);
+ console.log('PASS: API/realtime/save preserve zero quantity and zero cost');
+
 })().catch(e=>{console.error(e);process.exitCode=1});
